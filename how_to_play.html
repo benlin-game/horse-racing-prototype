@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>賽馬機台 · 玩法說明</title>
+  <style>
+    :root {
+      --bg:        #071320;
+      --surface:   #0f1a2e;
+      --card:      #111f35;
+      --border:    #1a2f50;
+      --gold:      #c9a227;
+      --gold-bright: #ffd700;
+      --text:      #dde3f0;
+      --text-sub:  #7a8ba0;
+      --green:     #2ecc71;
+      --blue:      #5dade2;
+      --purple:    #bb8fce;
+      --red:       #e74c3c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, #0a1c38 0%, #071320 60%);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      padding: 52px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 12%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 58% 30%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 72% 18%, rgba(255,255,255,.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 88% 10%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 40%, rgba(255,255,255,.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 8%,  rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 42%, rgba(255,255,255,.3) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-block;
+      border: 1px solid rgba(201,162,39,.5);
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: .15em;
+      padding: 3px 14px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 900;
+      letter-spacing: .04em;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(201,162,39,.4);
+    }
+    .hero h1 span { color: var(--gold-bright); }
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 15px;
+      color: var(--text-sub);
+      letter-spacing: .04em;
+    }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+    /* ── SECTION ── */
+    .section { margin-top: 48px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(201,162,39,.4), transparent);
+    }
+
+    /* ── FLOW STEPS ── */
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .flow-step-num {
+      position: absolute;
+      top: -11px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--gold);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .flow-step-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .flow-step-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .flow-step-desc {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* ── BET TYPES ── */
+    .bet-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .bet-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bet-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .bet-card.win    ::before, .bet-card.win    { --accent: rgba(212,175,55,1); }
+    .bet-card.place  ::before, .bet-card.place  { --accent: rgba(93,173,226,1); }
+    .bet-card.quinella::before, .bet-card.quinella { --accent: rgba(187,143,206,1); }
+    .bet-card::before { background: var(--accent); }
+
+    .bet-card-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      padding: 2px 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .win     .bet-card-tag { background: rgba(212,175,55,.2);  color: var(--gold);   border: 1px solid rgba(212,175,55,.4); }
+    .place   .bet-card-tag { background: rgba(93,173,226,.2);  color: var(--blue);   border: 1px solid rgba(93,173,226,.4); }
+    .quinella .bet-card-tag { background: rgba(187,143,206,.2); color: var(--purple); border: 1px solid rgba(187,143,206,.4); }
+
+    .bet-card-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .bet-card-rule {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+    .bet-card-rule strong { color: var(--text); }
+    .bet-card-example {
+      margin-top: 14px;
+      background: rgba(255,255,255,.04);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+    .bet-card-example em {
+      display: block;
+      font-style: normal;
+      color: var(--green);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* ── ODDS EXPLAIN ── */
+    .odds-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .odds-example {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .odds-chip {
+      background: rgba(201,162,39,.12);
+      border: 1px solid rgba(201,162,39,.3);
+      border-radius: 8px;
+      padding: 10px 18px;
+      text-align: center;
+    }
+    .odds-chip-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+    .odds-chip-val   { font-size: 22px; font-weight: 800; color: var(--gold-bright); font-family: 'Courier New', monospace; }
+    .odds-arrow { font-size: 22px; color: var(--text-sub); }
+    .odds-result {
+      background: rgba(46,204,113,.12);
+      border: 1px solid rgba(46,204,113,.3);
+      border-radius: 8px;
+      padding: 10px 18px;
+      text-align: center;
+    }
+    .odds-result-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+    .odds-result-val   { font-size: 22px; font-weight: 800; color: var(--green); font-family: 'Courier New', monospace; }
+    .odds-note {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    /* ── GOLDEN HORSE ── */
+    .golden-box {
+      background: linear-gradient(135deg, rgba(255,215,0,.06) 0%, var(--card) 50%);
+      border: 1px solid rgba(255,215,0,.3);
+      border-radius: 10px;
+      padding: 26px 24px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .golden-icon {
+      font-size: 52px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 16px rgba(255,215,0,.6));
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 8px rgba(255,215,0,.4)); }
+      to   { filter: drop-shadow(0 0 22px rgba(255,215,0,.9)); }
+    }
+    .golden-content h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold-bright);
+      margin-bottom: 10px;
+    }
+    .golden-content p {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.75;
+    }
+    .golden-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .golden-tag {
+      background: rgba(255,215,0,.12);
+      border: 1px solid rgba(255,215,0,.3);
+      color: var(--gold-bright);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 20px;
+    }
+
+    /* ── CAMERA STAGES ── */
+    .cam-stages {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .cam-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .cam-card-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+    .cam-card-phase {
+      font-size: 10px;
+      letter-spacing: .12em;
+      color: var(--gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .cam-card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .cam-card-desc {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* ── TIPS ── */
+    .tips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .tip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .tip-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+    .tip-text { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
+    .tip-text strong { color: var(--text); display: block; margin-bottom: 3px; font-size: 13px; }
+
+    /* ── RANK BAR DEMO ── */
+    .rank-demo {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .rank-demo-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .rank-demo-row:last-child { border-bottom: none; }
+    .rank-num { font-size: 16px; font-weight: 900; min-width: 28px; font-family: monospace; }
+    .rank-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .rank-name { font-size: 13px; font-weight: 600; flex: 1; }
+    .rank-badge {
+      font-size: 11px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 60px;
+      border-top: 1px solid var(--border);
+      padding: 24px 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    @media (max-width: 600px) {
+      .cam-stages { grid-template-columns: 1fr; }
+      .golden-box { flex-direction: column; align-items: center; text-align: center; }
+      .golden-tags { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-tag">玩法說明</div>
+  <h1>🏇 夜間<span>賽馬</span></h1>
+  <p class="hero-sub">選馬 · 下注 · 看比賽 · 贏彩金</p>
+</div>
+
+<div class="page">
+
+  <!-- ══ 遊戲流程 ══ -->
+  <div class="section">
+    <div class="section-title">遊戲流程</div>
+    <div class="flow">
+
+      <div class="flow-step">
+        <div class="flow-step-num">1</div>
+        <span class="flow-step-icon">🎫</span>
+        <div class="flow-step-label">選馬下注</div>
+        <div class="flow-step-desc">選好馬匹與注單類型，點擊格子即刻下注，隨時可以開始</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">2</div>
+        <span class="flow-step-icon">3️⃣</span>
+        <div class="flow-step-label">按下開始</div>
+        <div class="flow-step-desc">按「開始比賽」後 3—2—1—GO！<br>鏡頭聚焦起點，7 匹馬同步出發</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">3</div>
+        <span class="flow-step-icon">🏟️</span>
+        <div class="flow-step-label">觀賽</div>
+        <div class="flow-step-desc">即時排名即時更新，快到終點時鏡頭放大聚焦衝刺</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">4</div>
+        <span class="flow-step-icon">🏁</span>
+        <div class="flow-step-label">衝線結算</div>
+        <div class="flow-step-desc">全部 7 匹馬衝過終點，名次確定後自動派彩</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 注單類型 ══ -->
+  <div class="section">
+    <div class="section-title">注單類型</div>
+    <div class="bet-cards">
+
+      <div class="bet-card win">
+        <div class="bet-card-tag">WIN</div>
+        <div class="bet-card-name">獨贏</div>
+        <div class="bet-card-rule">
+          選 <strong>1 匹馬</strong>，猜牠跑<strong>第 1 名</strong>。<br>
+          賠率最高，是最刺激的玩法。
+        </div>
+        <div class="bet-card-example">
+          例：押 1,000 籌碼在賠率 5.2 的閃電王
+          <em>✓ 若閃電王奪冠 → 派彩 5,200 籌碼</em>
+        </div>
+      </div>
+
+      <div class="bet-card place">
+        <div class="bet-card-tag">PLACE</div>
+        <div class="bet-card-name">位置</div>
+        <div class="bet-card-rule">
+          選 <strong>1 匹馬</strong>，猜牠跑進<strong>前 3 名</strong>。<br>
+          賠率較低，但中注機率大得多。
+        </div>
+        <div class="bet-card-example">
+          例：押 1,000 籌碼在賠率 1.9 的黑旋風
+          <em>✓ 若黑旋風跑進前3 → 派彩 1,900 籌碼</em>
+        </div>
+      </div>
+
+      <div class="bet-card quinella">
+        <div class="bet-card-tag">QUINELLA</div>
+        <div class="bet-card-name">連贏</div>
+        <div class="bet-card-rule">
+          選 <strong>2 匹馬</strong>，猜這 2 匹馬包辦<strong>第 1、2 名</strong>（順序不限）。<br>
+          命中難度高，賠率相對豐厚。
+        </div>
+        <div class="bet-card-example">
+          例：押 1,000 籌碼選閃電王＋赤兔馬
+          <em>✓ 兩匹包辦前2名（不分先後）即中</em>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 賠率與派彩 ══ -->
+  <div class="section">
+    <div class="section-title">賠率與派彩</div>
+    <div class="odds-box">
+      <p style="font-size:14px; color:var(--text-sub); line-height:1.75;">
+        每匹馬的賠率顯示在看板格子上。中注後的<strong style="color:var(--text);">派彩金額 = 下注金額 × 賠率</strong>，即時加回你的籌碼餘額。
+      </p>
+      <div class="odds-example">
+        <div class="odds-chip">
+          <div class="odds-chip-label">下注金額</div>
+          <div class="odds-chip-val">1,000</div>
+        </div>
+        <div class="odds-arrow">×</div>
+        <div class="odds-chip">
+          <div class="odds-chip-label">賠率</div>
+          <div class="odds-chip-val">3.8</div>
+        </div>
+        <div class="odds-arrow">=</div>
+        <div class="odds-result">
+          <div class="odds-result-label">派彩</div>
+          <div class="odds-result-val">3,800</div>
+        </div>
+      </div>
+      <div class="odds-note">
+        ・賠率較高的馬代表勝率預估較低，但若命中彩金更豐厚。<br>
+        ・賠率會因每場馬匹不同而變動，每場重新計算。<br>
+        ・同一場可以同時下多張不同注單，下注金額各自計算。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 彩金馬 ══ -->
+  <div class="section">
+    <div class="section-title">彩金馬</div>
+    <div class="golden-box">
+      <div class="golden-icon">🐎</div>
+      <div class="golden-content">
+        <h3>♔ 彩金馬特別演出</h3>
+        <p>
+          部分場次會隨機出現 <strong style="color:var(--gold-bright);">彩金馬</strong>。<br>
+          彩金馬在賠率看板上以<strong style="color:var(--gold-bright);">金色邊框與皇冠標記</strong>顯示，跑馬時會有明顯的金色光暈，讓你在比賽過程中一眼認出牠的位置。
+        </p>
+        <div class="golden-tags">
+          <span class="golden-tag">金色邊框識別</span>
+          <span class="golden-tag">跑馬時金色光暈</span>
+          <span class="golden-tag">部分場次限定</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 三段鏡頭 ══ -->
+  <div class="section">
+    <div class="section-title">三段鏡頭演出</div>
+    <div class="cam-stages">
+
+      <div class="cam-card">
+        <span class="cam-card-icon">🔍</span>
+        <div class="cam-card-phase">Phase 1</div>
+        <div class="cam-card-name">起跑特寫</div>
+        <div class="cam-card-desc">GO！的瞬間鏡頭放大聚焦起點，7 匹馬蓄勢待發的緊張感一覽無遺</div>
+      </div>
+
+      <div class="cam-card">
+        <span class="cam-card-icon">🏟️</span>
+        <div class="cam-card-phase">Phase 2</div>
+        <div class="cam-card-name">正常視角</div>
+        <div class="cam-card-desc">起跑後鏡頭拉回，完整賽道盡收眼底，左側即時排名隨時更新</div>
+      </div>
+
+      <div class="cam-card">
+        <span class="cam-card-icon">🏁</span>
+        <div class="cam-card-phase">Phase 3</div>
+        <div class="cam-card-name">終點特寫</div>
+        <div class="cam-card-desc">領先群快接近終點時鏡頭再度放大，終點線居中，衝刺一幕不漏</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 比賽特色 ══ -->
+  <div class="section">
+    <div class="section-title">比賽特色</div>
+    <div class="tips">
+
+      <div class="tip">
+        <div class="tip-icon">📊</div>
+        <div class="tip-text">
+          <strong>即時排名欄</strong>
+          比賽中左側欄位即時顯示 7 匹馬的當前名次，升降箭頭一目瞭然。
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-icon">🏅</div>
+        <div class="tip-text">
+          <strong>衝線標記牌</strong>
+          每匹馬越過終點線的瞬間，賽道上自動出現名次標記牌，清楚記錄衝線順序。
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-icon">💫</div>
+        <div class="tip-text">
+          <strong>技能氣泡</strong>
+          比賽中段馬匹會隨機觸發技能，為牠們的拼勁加油！
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-icon">📋</div>
+        <div class="tip-text">
+          <strong>歷史紀錄</strong>
+          可查看近 50 場的名次紀錄與每匹馬的統計數據，找出你的規律。
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-icon">🔄</div>
+        <div class="tip-text">
+          <strong>場場獨立</strong>
+          每場 7 匹馬從馬池中重新抽出，賠率重新計算，無論輸贏下一場都是全新開始。
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 下注操作 ══ -->
+  <div class="section">
+    <div class="section-title">如何下注</div>
+    <div class="rank-demo">
+      <div class="rank-demo-row">
+        <div class="rank-num" style="color:#ffd700;">①</div>
+        <div class="rank-name" style="color:var(--text);">選擇注單類型：看板分為「獨贏」「位置」「連贏」三區</div>
+      </div>
+      <div class="rank-demo-row">
+        <div class="rank-num" style="color:#ffd700;">②</div>
+        <div class="rank-name" style="color:var(--text);">選取下注金額：點擊下方籌碼列選擇每注金額（100 / 500 / 1K / 5K / 10K）</div>
+      </div>
+      <div class="rank-demo-row">
+        <div class="rank-num" style="color:#ffd700;">③</div>
+        <div class="rank-name" style="color:var(--text);">點擊馬匹格子：點一下即刻扣款下注，同一格可以重複點擊累加</div>
+      </div>
+      <div class="rank-demo-row">
+        <div class="rank-num" style="color:#ffd700;">④</div>
+        <div class="rank-name" style="color:var(--text);">按下「開始比賽」：下注完成後隨時可按，3—2—1—GO！倒數後立即起跑</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="footer">
+  🏇 夜間賽馬 · 玩法說明  ／  如有疑問請洽服務人員
+</div>
+
+</body>
+</html>

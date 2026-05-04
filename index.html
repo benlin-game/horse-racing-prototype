@@ -50,7 +50,7 @@
       max-height:100vh;
       max-width:calc(100vh * 16/9);
       display:grid;
-      grid-template-rows: 8% 92%;
+      grid-template-rows: 8% 1fr 11%;
     }
 
     /* ── HEADER ── */
@@ -66,142 +66,206 @@
     .hd-div  { width:1px; height:60%; background:var(--border); margin:0 .4%; }
     .hd-spc  { flex:1; }
     #cd-wrap { display:flex; align-items:center; gap:.4em; }
-    #btn-start {
-      padding:0 clamp(10px,1.8vw,24px);
-      height:clamp(20px,4vh,36px);
-      border-radius:5px; border:none;
-      background:var(--accent-gold); color:#000;
-      font-size:clamp(8px,1.2vw,15px); font-weight:800;
-      cursor:pointer; transition:background .12s; letter-spacing:.06em;
-      white-space:nowrap;
-    }
-    #btn-start:hover    { background:var(--gold-bright); }
-    #btn-start:disabled { background:var(--border); color:var(--text-dim); cursor:not-allowed; }
     #bal-wrap { display:flex; align-items:center; gap:.4em; }
     #bal-label { font-size:clamp(6px,0.9vw,11px); color:var(--text-sub); }
     #bal-val { font-family:var(--fn-mono); font-size:clamp(9px,1.4vw,17px); font-weight:700; color:var(--color-win); }
 
     /* ── MAIN AREA ── */
-    #main-area { display:flex; overflow:hidden; }
+    #main-area { display:flex; overflow:hidden; position:relative; }
 
-    /* ── LEFT: 馬匹列表 ── */
+    /* ══ 投注區：欄式佈局（每馬一欄，每種玩法一列）══ */
     #tote-left {
-      flex:0 0 62%; display:flex; flex-direction:column;
-      overflow:hidden; border-right:1px solid var(--border);
+      flex:1; display:flex; flex-direction:column; overflow:hidden;
       background:var(--bg-primary);
     }
-    #tl-header {
-      display:grid;
-      grid-template-columns: 8% 12% 22% 29% 29%;
+
+    /* 每列通用 */
+    .tl-row {
+      display:flex; flex-shrink:0;
+      border-bottom:1px solid var(--border);
+    }
+
+    /* 各列高度 */
+    #tl-imgs-row          { flex:0 0 clamp(72px,22%,120px); }
+    #tl-names-row         { flex:0 0 clamp(18px,5.5%,28px); border-bottom:2px solid var(--border); }
+    #tl-win-row           { flex:1; min-height:clamp(26px,6%,42px); }
+    #tl-place-row         { flex:1; min-height:clamp(26px,6%,42px); border-bottom:2px solid var(--border); }
+    #tl-quinella-section  { flex:3; display:flex; overflow:hidden; border-bottom:none; }
+
+    /* 左側行標籤 */
+    .tl-row-lbl {
+      flex:0 0 clamp(34px,6.5%,54px);
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; text-align:center;
+      font-size:clamp(6px,.8vw,10px); font-weight:700; line-height:1.3;
+      border-right:2px solid var(--border); flex-shrink:0;
       background:var(--bg-surface);
-      border-bottom:2px solid var(--border);
+    }
+    .tl-row-lbl small { font-size:.75em; opacity:.6; font-weight:400; letter-spacing:0; }
+    .tl-row-lbl.win-lbl   { color:var(--accent-gold); }
+    .tl-row-lbl.place-lbl { color:#5dade2; }
+    .tl-row-lbl.q-lbl     { color:#bb8fce; }
+
+    /* 馬頭像格 */
+    .tl-img-cell {
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:5%;
+      border-right:1px solid var(--border); padding:3% 1%;
+      min-width:0; background:var(--bg-card); position:relative;
+    }
+    .tl-img-cell:last-child { border-right:none; }
+    .tl-img-cell.golden { background:var(--golden-bg); animation:goldenPulse 2s infinite; }
+    .tl-num-badge {
+      width:clamp(14px,2vw,22px); height:clamp(14px,2vw,22px);
+      border-radius:50%; border:2px solid currentColor;
+      display:flex; align-items:center; justify-content:center;
+      font-size:clamp(6px,.88vw,11px); font-weight:700; font-family:var(--fn-mono);
       flex-shrink:0;
     }
-    .tl-hcell {
-      display:flex; align-items:center; justify-content:center;
-      padding:2% 1%;
-      font-size:clamp(6px,.9vw,11px); font-weight:700;
-      color:var(--text-sub); letter-spacing:.06em;
-      border-left:1px solid var(--border);
+    .tl-portrait {
+      width:clamp(40px,6vw,72px); height:clamp(40px,6vw,72px);
+      object-fit:contain; border-radius:4px; border:2px solid;
     }
-    .tl-hcell:first-child, .tl-hcell:nth-child(2) { border-left:none; }
-    .tl-hcell.win-col   { color:var(--accent-gold); }
-    .tl-hcell.place-col { color:#5dade2; }
-    #tl-body { flex:0 0 52%; overflow-y:auto; }
-    .horse-row {
-      display:grid;
-      grid-template-columns: 8% 12% 22% 29% 29%;
-      border-bottom:1px solid var(--border);
-      min-height:clamp(36px,7.2vh,54px);
+    .tl-img-cell.golden .tl-portrait { box-shadow:0 0 8px 2px rgba(255,215,0,.5); }
+    .tl-golden-crown {
+      position:absolute; top:4%; right:5%;
+      font-size:clamp(7px,.88vw,11px); animation:blink 1.2s infinite alternate;
     }
-    /* ── 連贏 Grid 區塊 ── */
-    #tl-quinella {
-      flex:1; display:flex; flex-direction:column;
-      overflow:hidden; border-top:2px solid var(--border);
-    }
-    #tl-q-header {
-      display:flex; align-items:center; padding:1.5% 3%;
-      background:var(--bg-surface); border-bottom:1px solid var(--border);
-      font-size:clamp(6px,.9vw,11px); font-weight:700;
-      color:#bb8fce; letter-spacing:.08em; flex-shrink:0;
-    }
-    #tl-q-grid {
-      flex:1; overflow-y:auto; padding:1%;
-      display:flex; flex-direction:column; gap:1px;
-      background:var(--bg-card);
-    }
-    .q-group-row { display:flex; gap:1px; flex:1; min-height:clamp(22px,3.2vh,30px); }
-    .q-cell {
-      flex:1; display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      background:var(--bg-cell); border:1px solid var(--border);
-      border-radius:3px; cursor:pointer; transition:background .1s;
-      min-width:0; padding:1px 2px;
-    }
-    .q-cell:hover  { background:rgba(255,255,255,.05); }
-    .q-cell.sel    { background:var(--sel-bg); border-color:var(--border-sel); }
-    .q-cell.golden { background:var(--golden-bg); border-color:rgba(255,215,0,.35); }
-    .q-cell.golden.sel { background:rgba(255,215,0,.25); border-color:var(--gold-bright); }
-    .q-cell-lbl  { font-size:clamp(5px,.65vw,8px); color:var(--text-sub); font-family:var(--fn-mono); }
-    .q-cell-odds { font-size:clamp(6px,.85vw,11px); font-weight:700; font-family:var(--fn-mono); color:var(--text-main); }
-    .q-cell.golden .q-cell-odds { color:var(--color-golden); }
-    .q-cell.sel    .q-cell-odds { color:var(--gold-bright); }
-    .q-spacer { flex:1; }
-    .horse-row.golden { background:var(--golden-bg); animation:goldenPulse 2s infinite; }
-    .hr-num {
-      display:flex; align-items:center; justify-content:center;
+
+    /* 馬名格 */
+    .tl-name-cell {
+      flex:1; display:flex; align-items:center; justify-content:center;
       border-right:1px solid var(--border);
+      font-size:clamp(6px,.88vw,11px); font-weight:600;
+      padding:0 2%; min-width:0; overflow:hidden;
+      white-space:nowrap; text-overflow:ellipsis;
     }
-    .hr-num-badge {
-      width:clamp(16px,2.4vw,28px); height:clamp(16px,2.4vw,28px);
-      border-radius:50%; display:flex; align-items:center; justify-content:center;
-      font-size:clamp(7px,1vw,12px); font-weight:700; font-family:var(--fn-mono);
-      border:2px solid currentColor;
-    }
-    .hr-img {
-      display:flex; align-items:center; justify-content:center; padding:4%;
+    .tl-name-cell:last-child { border-right:none; }
+
+    /* 獨贏 / 位置 賠率格 — 編號左上、賠率右下 */
+    .tl-odds-cell {
+      flex:1; position:relative;
       border-right:1px solid var(--border);
+      cursor:pointer; transition:background .12s; min-width:0;
     }
-    .hr-portrait {
-      width:clamp(26px,4.2vw,50px); height:clamp(26px,4.2vw,50px);
-      border-radius:4px; object-fit:contain; border:2px solid;
+    .tl-odds-cell:last-child  { border-right:none; }
+    .tl-odds-cell:hover       { background:rgba(255,255,255,.05); }
+    .tl-odds-cell.sel         { background:var(--sel-bg); outline:1.5px solid var(--border-sel); }
+    .tl-odds-cell.golden      { background:var(--golden-bg); }
+    .tl-odds-cell.golden.sel  { background:rgba(255,215,0,.22); outline:1.5px solid var(--gold-bright); }
+    /* 編號徽章：左上 */
+    .tl-odds-cell .tl-num-badge {
+      position:absolute; top:3px; left:3px;
     }
-    .horse-row.golden .hr-portrait { box-shadow:0 0 6px 2px rgba(255,215,0,.5); }
-    .hr-name {
-      display:flex; align-items:center; padding:0 4%;
-      border-right:1px solid var(--border); position:relative; overflow:hidden;
+    /* 賠率：右下 */
+    .tl-odds-cell .hr-odds {
+      position:absolute; bottom:3px; right:3px;
+      font-size:clamp(7px,1.05vw,13px);
     }
-    .hr-name-text { font-size:clamp(7px,1vw,13px); font-weight:600; line-height:1.3; }
-    .golden-crown {
-      position:absolute; top:8%; right:5%;
-      font-size:clamp(7px,.9vw,12px); animation:blink 1.2s infinite alternate;
-    }
-    .hr-cell {
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      border-left:1px solid var(--border);
-      cursor:pointer; transition:background .12s;
-      gap:3%; padding:2%; position:relative;
-    }
-    .hr-cell:hover    { background:rgba(255,255,255,.05); }
-    .hr-cell.sel      { background:var(--sel-bg); outline:1.5px solid var(--border-sel); }
-    .hr-cell.golden   { background:var(--golden-bg); }
-    .hr-cell.golden.sel { background:rgba(255,215,0,.22); outline:1.5px solid var(--gold-bright); }
+
+    /* 賠率數字（共用顏色） */
     .hr-odds {
-      font-family:var(--fn-mono); font-weight:700;
-      font-size:clamp(8px,1.2vw,15px);
+      font-family:var(--fn-mono); font-weight:700; font-size:clamp(8px,1.2vw,15px);
     }
     .hr-odds.hot    { color:var(--color-hot); }
     .hr-odds.mid    { color:var(--text-main); }
     .hr-odds.cold   { color:var(--text-sub); }
     .hr-odds.golden { color:var(--color-golden); }
-    .hr-odds-unit { font-size:.7em; opacity:.55; }
-    .bet-badge {
+    .hr-odds-unit   { font-size:.7em; opacity:.55; }
+
+    /* 連贏區 */
+    #tl-q-cells {
+      flex:1; display:flex; flex-direction:column; overflow:hidden;
+    }
+    .tl-q-row {
+      flex:1; display:flex;
+      border-bottom:1px solid var(--border);
+    }
+    .tl-q-row:last-child { border-bottom:none; }
+    /* 連贏格 — 號碼組左上、賠率右下 */
+    .tl-q-cell {
+      flex:1; position:relative;
+      border-right:1px solid var(--border);
+      cursor:pointer; transition:background .1s; min-width:0;
+    }
+    .tl-q-cell:last-child    { border-right:none; }
+    .tl-q-cell:hover         { background:rgba(255,255,255,.05); }
+    .tl-q-cell.sel           { background:var(--sel-bg); outline:1.5px solid var(--border-sel); }
+    .tl-q-cell.golden        { background:var(--golden-bg); }
+    .tl-q-cell.golden.sel    { background:rgba(255,215,0,.25); outline:1.5px solid var(--gold-bright); }
+    /* 兩個彩色圈圈：左上 */
+    .tl-q-pair {
+      position:absolute; top:3px; left:3px;
+      display:flex; gap:2px; align-items:center;
+    }
+    .tl-q-num {
+      width:clamp(11px,1.5vw,18px); height:clamp(11px,1.5vw,18px);
+      border-radius:50%; border:1.5px solid currentColor;
+      display:flex; align-items:center; justify-content:center;
+      font-size:clamp(5px,.62vw,8px); font-weight:700; font-family:var(--fn-mono);
+      flex-shrink:0;
+    }
+    /* 賠率：右下 */
+    .tl-q-odds {
       position:absolute; bottom:3px; right:3px;
+      font-size:clamp(6px,.84vw,11px); font-weight:700;
+      font-family:var(--fn-mono); color:var(--text-main);
+    }
+    .tl-q-cell.golden .tl-q-odds { color:var(--color-golden); }
+    .tl-q-cell.sel    .tl-q-odds { color:var(--gold-bright); }
+
+    /* 投注金額徽章：右上角 */
+    .bet-badge {
+      position:absolute; top:3px; right:3px;
       background:var(--accent-gold); color:#000;
       font-family:var(--fn-mono); font-weight:700;
-      font-size:clamp(4px,.6vw,8px); padding:1px 4px;
-      border-radius:3px; pointer-events:none; line-height:1.4; white-space:nowrap;
+      font-size:clamp(4px,.58vw,7px); padding:1px 3px;
+      border-radius:2px; pointer-events:none; line-height:1.4; white-space:nowrap;
     }
+
+    /* ── 中獎格閃爍 ── */
+    @keyframes flash-win {
+      0%,100% { background:inherit; }
+      35%,65% { background:rgba(46,204,113,.22); outline:2px solid #2ecc71; }
+    }
+    .flash-win { animation:flash-win .5s ease-in-out 4; }
+
+    /* ── 結算 Dialog ── */
+    .settle-overlay {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,.75);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .25s;
+    }
+    .settle-overlay.active { opacity:1; pointer-events:all; }
+    .settle-box {
+      position:relative; overflow:hidden;
+      background:var(--bg-surface); border:1.5px solid var(--border);
+      border-radius:14px;
+      padding:clamp(14px,3vw,30px) clamp(20px,4.5vw,44px);
+      min-width:clamp(180px,28vw,320px);
+      text-align:center;
+      box-shadow:0 12px 50px rgba(0,0,0,.9);
+    }
+    .settle-box.win-box  { border-color:var(--color-win); }
+    .settle-box.gold-box { border-color:var(--color-golden); }
+    .settle-box.warn-box { border-color:var(--color-lose); }
+    .sd-icon   { font-size:clamp(28px,5vw,54px); line-height:1.1; margin-bottom:5%; }
+    .sd-title  { font-size:clamp(10px,1.7vw,20px); font-weight:800; color:var(--text-main); margin-bottom:3%; }
+    .sd-title.gold { color:var(--color-golden); }
+    .sd-title.warn { color:var(--color-lose); }
+    .sd-amount { font-size:clamp(18px,3vw,36px); font-weight:900; color:var(--color-win); font-family:var(--fn-mono); margin-bottom:5%; min-height:1.2em; }
+    .sd-amount.gold { color:var(--color-golden); }
+    .sd-sub    { font-size:clamp(7px,.95vw,11px); color:var(--text-dim); margin-bottom:7%; min-height:1.2em; }
+    .sd-btn    { background:var(--accent-gold); color:#000; border:none; border-radius:6px; padding:clamp(5px,.8vw,9px) clamp(20px,3.5vw,36px); font-size:clamp(9px,1.2vw,14px); font-weight:700; cursor:pointer; letter-spacing:.04em; }
+    .sd-btn:hover { filter:brightness(1.12); }
+    .sd-btn.warn  { background:var(--color-lose); color:#fff; }
+    /* 硬幣噴射粒子 */
+    @keyframes coin-fly {
+      0%   { transform:translate(0,0) scale(1) rotate(0deg); opacity:1; }
+      100% { transform:translate(var(--tx),var(--ty)) scale(0.3) rotate(360deg); opacity:0; }
+    }
+    .coin-p { position:absolute; pointer-events:none; font-size:clamp(10px,1.6vw,20px); animation:coin-fly .9s ease-out forwards; }
 
     /* ── RIGHT: 投注單面板 ── */
     #bet-panel {
@@ -251,33 +315,33 @@
       font-size:clamp(6px,.85vw,10px); font-weight:700;
       letter-spacing:.12em; color:var(--text-dim); text-transform:uppercase; margin-bottom:5%;
     }
-    .insight-wrap { display:flex; gap:4%; align-items:flex-start; }
+    .insight-wrap { display:grid; grid-template-columns:1fr 1fr; gap:3%; }
     .insight-card {
-      flex:1; max-width:48%; background:var(--bg-card);
+      width:100%; background:var(--bg-card);
       border:1px solid var(--border); border-radius:6px;
-      padding:5% 6%; display:flex; flex-direction:column; align-items:center; gap:5%;
+      padding:4% 5%; display:flex; flex-direction:row;
+      align-items:center; gap:6%;
       min-width:0; overflow:hidden; animation:cd-appear .25s ease-out;
     }
-    .ic-badge-row {
-      display:flex; align-items:center; gap:4%; width:100%;
-    }
-    .ic-icon  { font-size:clamp(10px,1.4vw,16px); flex-shrink:0; }
-    .ic-title { font-size:clamp(5px,.75vw,9px); font-weight:700; color:var(--text-sub); letter-spacing:.06em; }
+    .ic-left  { display:flex; align-items:center; gap:5%; flex-shrink:0; }
+    .ic-icon  { font-size:clamp(11px,1.5vw,18px); flex-shrink:0; }
     .ic-portrait-wrap {
       position:relative; flex-shrink:0;
-      width:clamp(30px,4vw,50px); height:clamp(30px,4vw,50px);
+      width:clamp(26px,3.5vw,44px); height:clamp(26px,3.5vw,44px);
     }
     .ic-portrait {
       width:100%; height:100%; object-fit:cover;
-      border-radius:5px; border:2px solid; display:block;
+      border-radius:4px; border:2px solid; display:block;
     }
     .ic-portrait-fallback {
-      width:100%; height:100%; border-radius:5px; border:2px solid;
+      width:100%; height:100%; border-radius:4px; border:2px solid;
       display:none; align-items:center; justify-content:center;
-      font-size:clamp(12px,1.8vw,22px);
+      font-size:clamp(10px,1.5vw,18px);
     }
-    .ic-horse { font-size:clamp(7px,.95vw,11px); font-weight:700; text-align:center; }
-    .ic-desc  { font-size:clamp(5px,.68vw,8px); color:var(--text-sub); text-align:center; }
+    .ic-right  { flex:1; min-width:0; display:flex; flex-direction:column; gap:3%; }
+    .ic-title  { font-size:clamp(5px,.75vw,9px); font-weight:700; color:var(--text-sub); letter-spacing:.06em; }
+    .ic-horse  { font-size:clamp(7px,.95vw,11px); font-weight:700; }
+    .ic-desc   { font-size:clamp(5px,.68vw,8px); color:var(--text-sub); }
     .insight-empty { font-size:clamp(7px,.9vw,11px); color:var(--text-dim); text-align:center; padding:4% 0; }
     /* 籌碼 */
     #panel-chips {
@@ -459,7 +523,7 @@
     /* ── 馬匹（在 #ro-track 內） ── */
     .ro-horse-wrap {
       position:absolute; display:flex; align-items:center; gap:clamp(2px,.4vw,5px);
-      z-index:5; transform:translateY(-50%);
+      z-index:5; transform:translateY(-50%); overflow:visible;
     }
     .ro-horse-num {
       width:clamp(14px,2vw,22px); height:clamp(14px,2vw,22px);
@@ -468,14 +532,17 @@
       font-size:clamp(7px,.9vw,11px); font-weight:700; color:#fff;
       border:2px solid currentColor;
     }
-    .ro-horse-emoji {
-      font-size:clamp(18px,2.8vw,30px); line-height:1;
-      animation:gallop .32s ease-in-out infinite alternate;
+    .ro-horse-sprite {
+      width:52px; height:52px;
+      background-image:url('gen_tools/銀翼馬/horse_1x6.png');
+      background-size:312px 52px;
+      background-repeat:no-repeat;
+      background-position:0 0;
       filter:drop-shadow(1px 2px 3px rgba(0,0,0,.7));
+      flex-shrink:0;
     }
-    .ro-horse-wrap.golden .ro-horse-emoji {
-      filter:drop-shadow(0 0 8px #ffd700) drop-shadow(1px 2px 3px rgba(0,0,0,.7));
-      animation:gallop-gold .28s ease-in-out infinite alternate;
+    .ro-horse-wrap.golden .ro-horse-sprite {
+      filter:drop-shadow(0 0 10px #ffd700) drop-shadow(1px 2px 3px rgba(0,0,0,.7));
     }
     .ro-horse-name {
       font-size:clamp(7px,.85vw,11px); color:rgba(255,255,255,.85);
@@ -669,32 +736,39 @@
       100%{ transform:scale(1.3); opacity:0; }
     }
 
-    /* ── 終點名次標記牌 ── */
-    .race-rank-marker {
-      position:absolute; z-index:15; pointer-events:none;
-      display:flex; align-items:center; gap:clamp(2px,.35vw,5px);
-      padding:2px 8px 2px 5px;
-      background:rgba(6,10,22,.88);
-      border:1.5px solid;
-      border-radius:4px;
-      transform:translateY(-50%);
-      white-space:nowrap;
-      animation:marker-pop .22s cubic-bezier(.18,1.4,.6,1) both;
+    /* ── 終點名次結果面板 ── */
+    #finish-results {
+      position:absolute; right:1.2%; top:12%;
+      z-index:18; pointer-events:none;
+      display:flex; flex-direction:column;
+      gap:clamp(2px,.35vh,4px);
+      min-width:clamp(90px,16vw,180px);
     }
-    .rrm-rank {
-      font-size:clamp(7px,1vw,13px); font-weight:900;
-      min-width:2.4em; text-align:center; letter-spacing:.02em;
+    .frm-row {
+      display:flex; align-items:center;
+      gap:clamp(3px,.4vw,6px);
+      padding:clamp(2px,.35vh,4px) clamp(5px,.8vw,9px) clamp(2px,.35vh,4px) clamp(3px,.5vw,6px);
+      border-radius:4px; border:1.5px solid; white-space:nowrap;
+      animation:marker-pop .25s cubic-bezier(.18,1.4,.6,1) both;
     }
-    .rrm-num {
-      width:clamp(13px,1.8vw,22px); height:clamp(13px,1.8vw,22px);
+    .frm-row.rank-1 { border-color:#ffd700bb; background:rgba(255,215,0,.18); }
+    .frm-row.rank-2 { border-color:#c0c0c0bb; background:rgba(192,192,192,.12); }
+    .frm-row.rank-3 { border-color:#cd7f32bb; background:rgba(205,127,50,.15); }
+    .frm-row.rank-other { border-color:rgba(50,70,105,.8); background:rgba(12,18,32,.88); }
+    .frm-rank {
+      font-size:clamp(7px,.9vw,11px); font-weight:900;
+      min-width:2.2em; text-align:center; letter-spacing:.02em;
+    }
+    .frm-num {
+      width:clamp(12px,1.6vw,19px); height:clamp(12px,1.6vw,19px);
       border-radius:50%; flex-shrink:0;
       display:flex; align-items:center; justify-content:center;
-      font-size:clamp(6px,.85vw,11px); font-weight:700; border:1.5px solid;
+      font-size:clamp(5px,.75vw,9px); font-weight:700; border:1.5px solid;
     }
-    .rrm-name { font-size:clamp(6px,.85vw,10px); opacity:.9; }
+    .frm-name { font-size:clamp(6px,.8vw,10px); }
     @keyframes marker-pop {
-      from { transform:translateY(-50%) scale(.5); opacity:0; }
-      to   { transform:translateY(-50%) scale(1);  opacity:1; }
+      from { transform:scale(.5); opacity:0; }
+      to   { transform:scale(1);  opacity:1; }
     }
 
     /* ── SKILL BUBBLES ── */
@@ -743,8 +817,7 @@
 
     /* ── ANIMATIONS ── */
     @keyframes blink   { from{opacity:1} to{opacity:.35} }
-    @keyframes gallop      { from{transform:translateY(0) rotate(-1deg)} to{transform:translateY(-5px) rotate(1deg)} }
-    @keyframes gallop-gold { from{transform:translateY(0) rotate(-2deg) scale(1.08)} to{transform:translateY(-7px) rotate(2deg) scale(1.08)} }
+    /* horse-run handled by JS setInterval — see horseAnimTick() */
     @keyframes skill-flash { 0%{filter:drop-shadow(0 0 12px var(--sc)) brightness(2)} 60%{filter:drop-shadow(0 0 5px var(--sc)) brightness(1.4)} 100%{filter:drop-shadow(1px 2px 3px rgba(0,0,0,.7))} }
     @keyframes coinPop {
       0%  { transform:scale(0) translateY(0); opacity:1; }
@@ -756,18 +829,113 @@
       50%    { box-shadow:0 0 16px 3px rgba(255,215,0,.55); }
     }
 
-    /* ── BET BADGE (骰寶式籌碼顯示) ── */
-    .odds-cell, .q-cell { position:relative; }
-    .bet-badge {
-      position:absolute; bottom:3px; right:3px;
-      background:var(--accent-gold); color:#000;
-      font-family:var(--fn-mono); font-weight:700;
-      font-size:clamp(5px,.7vw,9px);
-      padding:1px 4px; border-radius:3px;
-      pointer-events:none; line-height:1.4;
-      white-space:nowrap;
+    /* ── BET BADGE (舊殘留已整合至 cell-tl，此段保留空白佔位）── */
+
+    /* ── 資訊面板按鈕（Header）── */
+    #btn-info-toggle {
+      display:flex; align-items:center; gap:.3em;
+      padding:0 clamp(5px,.9vw,12px);
+      height:clamp(16px,3.5vh,30px);
+      border-radius:4px; border:1px solid var(--border);
+      background:transparent; color:var(--text-sub);
+      font-size:clamp(6px,.9vw,11px); font-weight:600;
+      cursor:pointer; transition:all .15s; white-space:nowrap;
     }
-    .q-cell .bet-badge { font-size:clamp(4px,.6vw,8px); bottom:2px; right:2px; }
+    #btn-info-toggle:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
+    #btn-info-toggle.open  {
+      border-color:rgba(201,162,39,.6); color:var(--accent-gold);
+      background:rgba(201,162,39,.12);
+    }
+
+    /* ── 資訊面板（可收合抽屜）── */
+    #info-panel {
+      position:absolute; left:0; top:0; bottom:0;
+      width:clamp(240px,38%,420px);
+      background:var(--bg-surface);
+      border-right:2px solid var(--border-sel);
+      box-shadow:6px 0 28px rgba(0,0,0,.75);
+      z-index:30;
+      display:flex; flex-direction:column; overflow-y:auto;
+      transform:translateX(-105%);
+      transition:transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    #info-panel.open { transform:translateX(0); }
+    #info-overlay {
+      display:none; position:absolute; inset:0;
+      background:rgba(0,0,0,.42); z-index:29;
+    }
+    #info-overlay.active { display:block; }
+
+    /* ── BOTTOM BAR ── */
+    #bottom-bar {
+      display:flex; align-items:center;
+      background:#12100a;
+      border-top:2px solid var(--border);
+      padding:0 1.2%;
+      gap:.8%;
+      overflow:hidden;
+    }
+    #bb-bet-info {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.55); border:1px solid var(--border);
+      border-radius:5px; padding:0 1.8%;
+      min-width:8%; height:72%; flex-shrink:0;
+    }
+    .bb-bet-label {
+      font-size:clamp(5px,.65vw,8px); color:var(--text-sub);
+      letter-spacing:.06em; white-space:nowrap;
+    }
+    #pf-total-val {
+      font-family:var(--fn-mono); font-size:clamp(9px,1.3vw,16px);
+      font-weight:700; color:var(--accent-gold);
+    }
+    #bb-chips {
+      display:flex; gap:clamp(3px,.5vw,6px); align-items:center; flex-shrink:0;
+    }
+    .bb-chip {
+      width:clamp(28px,4.2vw,50px); height:clamp(28px,4.2vw,50px);
+      border-radius:50%; border:3px dashed;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--fn-mono); font-weight:800;
+      font-size:clamp(6px,.82vw,10px);
+      cursor:pointer; transition:transform .1s, box-shadow .1s;
+      position:relative; flex-shrink:0; user-select:none;
+    }
+    .bb-chip:hover  { transform:scale(1.1); }
+    .bb-chip.active { transform:scale(1.12); box-shadow:0 0 14px 3px currentColor; border-style:solid; }
+    .bb-chip[data-chip="100"]   { background:#3a3a4a; border-color:#8888aa; color:#ccccee; }
+    .bb-chip[data-chip="500"]   { background:#1e3a22; border-color:#44aa4a; color:#88ee88; }
+    .bb-chip[data-chip="1000"]  { background:#12285a; border-color:#3377cc; color:#77aaff; }
+    .bb-chip[data-chip="5000"]  { background:#38124a; border-color:#9933cc; color:#cc88ff; }
+    .bb-chip[data-chip="10000"] { background:#4a1e10; border-color:#cc5522; color:#ffaa66; }
+    .bb-spacer { flex:1; }
+    .bb-btn {
+      height:clamp(22px,5.5vh,42px);
+      border-radius:5px; border:1.5px solid;
+      font-weight:700; font-size:clamp(7px,1.0vw,13px);
+      cursor:pointer; padding:0 clamp(6px,1.2vw,16px);
+      white-space:nowrap; transition:all .12s; flex-shrink:0;
+    }
+    #bb-btn-repeat {
+      background:rgba(255,255,255,.05); border-color:var(--border);
+      color:var(--text-sub);
+    }
+    #bb-btn-repeat:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
+    #bb-btn-allbet {
+      background:rgba(46,204,113,.12); border-color:#27ae60; color:#2ecc71;
+    }
+    #bb-btn-allbet:hover { background:#27ae60; color:#000; }
+    #bb-btn-cancel {
+      background:transparent; border-color:var(--border); color:var(--text-sub);
+    }
+    #bb-btn-cancel:hover { border-color:var(--color-lose); color:var(--color-lose); }
+    #btn-start {
+      background:var(--accent-gold); border-color:var(--accent-gold); color:#000;
+      font-size:clamp(8px,1.25vw,15px); font-weight:800;
+      padding:0 clamp(10px,2vw,26px);
+    }
+    #btn-start:hover    { background:var(--gold-bright); border-color:var(--gold-bright); }
+    #btn-start:disabled { background:var(--border); border-color:var(--border); color:var(--text-dim); cursor:not-allowed; }
 
     /* ── HISTORY BUTTON ── */
     #btn-history {
@@ -921,6 +1089,8 @@
 
     <!-- ══ HEADER ══ -->
     <div id="header">
+      <button id="btn-info-toggle" onclick="toggleInfoPanel()">📊 賽事資訊</button>
+      <div class="hd-div"></div>
       <span class="hd-race" id="race-lbl">RACE 1</span>
       <span class="hd-info" id="race-info">草地 · 1200m</span>
       <span class="hd-info" id="machine-num-lbl" style="color:var(--accent-gold);opacity:.65;font-family:var(--fn-mono)">#--- 號賽道</span>
@@ -946,42 +1116,52 @@
     <!-- ══ MAIN AREA ══ -->
     <div id="main-area">
 
-      <!-- LEFT: 馬匹列表 + 賠率 -->
-      <div id="tote-left">
-        <div id="tl-header">
-          <div class="tl-hcell"></div>
-          <div class="tl-hcell"></div>
-          <div class="tl-hcell">馬匹</div>
-          <div class="tl-hcell win-col">獨贏</div>
-          <div class="tl-hcell place-col">位置</div>
-        </div>
-        <div id="tl-body"><!-- 馬匹列由 JS 注入 --></div>
-        <div id="tl-quinella">
-          <div id="tl-q-header">連 贏</div>
-          <div id="tl-q-grid"><!-- 21 組由 JS 注入 --></div>
-        </div>
-      </div>
-
-      <!-- RIGHT: 投注單面板 -->
-      <div id="bet-panel">
+      <!-- 資訊面板（可收合抽屜）-->
+      <div id="info-panel">
         <div id="panel-lastrace"></div>
         <div id="panel-insights"></div>
-        <div id="panel-chips"></div>
-        <div id="panel-bets"></div>
-        <div id="panel-footer">
-          <div class="pf-summary">
-            <span>本局下注</span>
-            <span class="pf-total" id="pf-total-val">$0</span>
-          </div>
-          <div class="pf-row">
-            <button class="pf-btn" onclick="repeatBet()">重複下注</button>
-            <button class="pf-btn primary" onclick="betAll()">一鍵全注</button>
-            <button class="pf-btn cancel" onclick="cancelAll()">取消</button>
-            <button class="pf-btn" id="btn-start" onclick="beginRace()">🏇 開始比賽</button>
-          </div>
+      </div>
+      <div id="info-overlay" onclick="toggleInfoPanel()"></div>
+
+      <!-- 投注區（欄式：每馬一欄）-->
+      <div id="tote-left">
+        <!-- Row 1: 馬頭像 -->
+        <div id="tl-imgs-row" class="tl-row">
+          <div class="tl-row-lbl"></div>
+        </div>
+        <!-- Row 2: 馬匹名字 -->
+        <div id="tl-names-row" class="tl-row">
+          <div class="tl-row-lbl"></div>
+        </div>
+        <!-- Row 3: 獨贏 -->
+        <div id="tl-win-row" class="tl-row">
+          <div class="tl-row-lbl win-lbl">獨贏<br><small>猜第一名</small></div>
+        </div>
+        <!-- Row 4: 位置 -->
+        <div id="tl-place-row" class="tl-row">
+          <div class="tl-row-lbl place-lbl">位置<br><small>猜前三名</small></div>
+        </div>
+        <!-- Row 5: 連贏 (3×7) -->
+        <div id="tl-quinella-section" class="tl-row">
+          <div class="tl-row-lbl q-lbl">連贏<br><small>猜前兩名</small></div>
+          <div id="tl-q-cells"></div>
         </div>
       </div>
 
+    </div>
+
+    <!-- ══ BOTTOM BAR ══ -->
+    <div id="bottom-bar">
+      <div id="bb-bet-info">
+        <div class="bb-bet-label">本局下注</div>
+        <div id="pf-total-val">$0</div>
+      </div>
+      <div id="bb-chips"><!-- JS rendered --></div>
+      <div class="bb-spacer"></div>
+      <button id="bb-btn-repeat" class="bb-btn" onclick="repeatBet()">□ 重複下注</button>
+      <button id="bb-btn-allbet" class="bb-btn" onclick="betAll()">一鍵全注</button>
+      <button id="bb-btn-cancel" class="bb-btn" onclick="cancelAll()">取消</button>
+      <button id="btn-start" class="bb-btn" onclick="beginRace()">開賽</button>
     </div>
 
     <!-- ══ RACE OVERLAY ══ -->
@@ -1012,6 +1192,8 @@
       </div>
       <!-- 倒數計時：race-overlay 直接子元素，不受 ro-track 鏡頭變形影響 -->
       <div id="race-countdown"></div>
+      <!-- 終點名次面板：固定在 overlay 右側，不隨鏡頭移動 -->
+      <div id="finish-results"></div>
       <!-- ── 結算 Dialog ── -->
       <div id="result-backdrop">
         <div id="ro-result">
@@ -1309,9 +1491,7 @@ function showSkillBubble(horse, skill) {
     emojiEl.style.setProperty('--sc', skill.color);
     emojiEl.style.animation = 'skill-flash .7s ease-out forwards';
     setTimeout(() => {
-      emojiEl.style.animation = horse.isGolden
-        ? 'gallop-gold .28s ease-in-out infinite alternate'
-        : 'gallop .32s ease-in-out infinite alternate';
+      emojiEl.style.animation = ''; // JS timer handles background-position
     }, 720);
   }
 
@@ -1578,85 +1758,115 @@ function oddsClass(odds) {
 // ════════════════════════════════════
 // RENDER — 左側馬匹列表
 // ════════════════════════════════════
+// 清除某列的動態格（保留第一個 label 格）
+function clearRow(id) {
+  const el = document.getElementById(id);
+  if (!el) return el;
+  while (el.children.length > 1) el.removeChild(el.lastChild);
+  return el;
+}
+
 function renderToteBoard() {
-  const horses  = S.horses;
+  const sorted  = [...S.horses].sort((a, b) => a.pos - b.pos);
   const betting = S.phase === 'BETTING';
-  const body    = document.getElementById('tl-body');
-  body.innerHTML = '';
 
-  [...horses].sort((a, b) => a.pos - b.pos).forEach(h => {
-    const wBet = cellBetTotal('WIN',   [h.pos]);
-    const pBet = cellBetTotal('PLACE', [h.pos]);
-    const wCls = h.isGolden ? 'golden' : oddsClass(h.winOdds);
-    const pCls = h.isGolden ? 'golden' : oddsClass(h.placeOdds);
-
-    const row = document.createElement('div');
-    row.className = 'horse-row' + (h.isGolden ? ' golden' : '');
-    row.innerHTML = `
-      <div class="hr-num">
-        <div class="hr-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
-      </div>
-      <div class="hr-img">
-        <img class="hr-portrait" src="./馬頭像/${h.name}.png" alt="${h.name}"
-             style="border-color:${h.isGolden?'#ffd700':h.color};"
-             onerror="imgFallback(this,'${h.silk}','${h.name}','${h.isGolden}')">
-      </div>
-      <div class="hr-name">
-        ${h.isGolden ? '<span class="golden-crown">♔</span>' : ''}
-        <span class="hr-name-text" style="color:${h.color}">${h.name}</span>
-      </div>
-      <div class="hr-cell${h.isGolden?' golden':''}${wBet>0?' sel':''}" data-type="WIN" data-pos="${h.pos}">
-        <span class="hr-odds ${wCls}">${h.winOdds}<span class="hr-odds-unit">x</span></span>
-        ${wBet > 0 ? `<div class="bet-badge">$${wBet}</div>` : ''}
-      </div>
-      <div class="hr-cell${h.isGolden?' golden':''}${pBet>0?' sel':''}" data-type="PLACE" data-pos="${h.pos}">
-        <span class="hr-odds ${pCls}">${h.placeOdds}<span class="hr-odds-unit">x</span></span>
-        ${pBet > 0 ? `<div class="bet-badge">$${pBet}</div>` : ''}
-      </div>`;
-
-    if (betting) {
-      row.querySelectorAll('.hr-cell').forEach(cell => {
-        cell.addEventListener('click', () => {
-          const t   = cell.dataset.type;
-          const pos = +cell.dataset.pos;
-          if      (t === 'WIN')   placeBet('WIN',   pos);
-          else if (t === 'PLACE') placeBet('PLACE', pos);
-        });
-      });
-    }
-    body.appendChild(row);
+  // ── Row 1: 馬頭像 ──
+  const imgsRow = clearRow('tl-imgs-row');
+  sorted.forEach(h => {
+    const cell = document.createElement('div');
+    cell.className = 'tl-img-cell' + (h.isGolden ? ' golden' : '');
+    cell.innerHTML = `
+      <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
+      <img class="tl-portrait" src="./馬頭像/${h.name}.png"
+           style="border-color:${h.isGolden?'#ffd700':h.color};"
+           onerror="imgFallback(this,'${h.silk}','${h.name}','${h.isGolden}')">
+      ${h.isGolden ? '<span class="tl-golden-crown">♔</span>' : ''}`;
+    imgsRow.appendChild(cell);
   });
 
+  // ── Row 2: 馬匹名字 ──
+  const namesRow = clearRow('tl-names-row');
+  sorted.forEach(h => {
+    const cell = document.createElement('div');
+    cell.className = 'tl-name-cell';
+    cell.style.color = h.isGolden ? '#ffd700' : h.color;
+    cell.textContent = h.name;
+    namesRow.appendChild(cell);
+  });
+
+  // ── Row 3: 獨贏 ──
+  const winRow = clearRow('tl-win-row');
+  sorted.forEach(h => {
+    const wBet = cellBetTotal('WIN', [h.pos]);
+    const wCls = h.isGolden ? 'golden' : oddsClass(h.winOdds);
+    const cell = document.createElement('div');
+    cell.className = `tl-odds-cell${h.isGolden?' golden':''}${wBet>0?' sel':''}`;
+    cell.dataset.type = 'WIN'; cell.dataset.pos = h.pos;
+    cell.innerHTML = `
+      <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
+      ${wBet > 0 ? `<span class="bet-badge">$${wBet}</span>` : ''}
+      <span class="hr-odds ${wCls}">${h.winOdds}<span class="hr-odds-unit">x</span></span>`;
+    if (betting) cell.addEventListener('click', () => placeBet('WIN', h.pos));
+    winRow.appendChild(cell);
+  });
+
+  // ── Row 4: 位置 ──
+  const placeRow = clearRow('tl-place-row');
+  sorted.forEach(h => {
+    const pBet = cellBetTotal('PLACE', [h.pos]);
+    const pCls = h.isGolden ? 'golden' : oddsClass(h.placeOdds);
+    const cell = document.createElement('div');
+    cell.className = `tl-odds-cell${h.isGolden?' golden':''}${pBet>0?' sel':''}`;
+    cell.dataset.type = 'PLACE'; cell.dataset.pos = h.pos;
+    cell.innerHTML = `
+      <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
+      ${pBet > 0 ? `<span class="bet-badge">$${pBet}</span>` : ''}
+      <span class="hr-odds ${pCls}">${h.placeOdds}<span class="hr-odds-unit">x</span></span>`;
+    if (betting) cell.addEventListener('click', () => placeBet('PLACE', h.pos));
+    placeRow.appendChild(cell);
+  });
+
+  // ── Row 5: 連贏 (3 × 7) ──
   renderQuinellaGrid();
 }
 
 function renderQuinellaGrid() {
-  const qgrid   = document.getElementById('tl-q-grid');
+  const qcells  = document.getElementById('tl-q-cells');
   const betting = S.phase === 'BETTING';
-  if (!qgrid) return;
-  qgrid.innerHTML = '';
+  if (!qcells) return;
+  qcells.innerHTML = '';
+
   const sorted = [...S.horses].sort((a, b) => a.pos - b.pos);
-  const n = sorted.length;
-  for (let i = 0; i < n - 1; i++) {
-    const row = document.createElement('div');
-    row.className = 'q-group-row';
-    for (let j = i + 1; j < n; j++) {
-      const ha = sorted[i], hb = sorted[j];
+  // 21 組組合，依序排入 3 列 × 7 欄
+  const pairs = [];
+  for (let i = 0; i < sorted.length - 1; i++)
+    for (let j = i + 1; j < sorted.length; j++)
+      pairs.push([sorted[i], sorted[j]]);
+
+  for (let r = 0; r < 3; r++) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'tl-q-row';
+    for (let c = 0; c < 7; c++) {
+      const idx = r * 7 + c;
+      if (idx >= pairs.length) break;
+      const [ha, hb] = pairs[idx];
       const odds   = calcQuinellaOdds(ha, hb);
       const betAmt = cellBetTotal('QUINELLA', [ha.pos, hb.pos]);
       const hasG   = ha.isGolden || hb.isGolden;
       const cell   = document.createElement('div');
-      cell.className = `q-cell${hasG?' golden':''}${betAmt>0?' sel':''}`;
-      cell.innerHTML = `<div class="q-cell-lbl">${ha.pos}-${hb.pos}</div>
-        <div class="q-cell-odds">${odds}x</div>
-        ${betAmt > 0 ? `<div class="bet-badge">$${betAmt}</div>` : ''}`;
+      cell.className = `tl-q-cell${hasG?' golden':''}${betAmt>0?' sel':''}`;
+      cell.dataset.type = 'QUINELLA'; cell.dataset.posA = ha.pos; cell.dataset.posB = hb.pos;
+      cell.innerHTML = `
+        <div class="tl-q-pair">
+          <span class="tl-q-num" style="color:${ha.color};border-color:${ha.color}">${ha.pos}</span>
+          <span class="tl-q-num" style="color:${hb.color};border-color:${hb.color}">${hb.pos}</span>
+        </div>
+        ${betAmt > 0 ? `<span class="bet-badge">$${betAmt}</span>` : ''}
+        <div class="tl-q-odds">${odds}x</div>`;
       if (betting) cell.addEventListener('click', () => placeQuinellaBet(ha.pos, hb.pos));
-      row.appendChild(cell);
+      rowEl.appendChild(cell);
     }
-    for (let k = n - 1 - i; k < n - 1; k++) {
-      const sp = document.createElement('div'); sp.className = 'q-spacer'; row.appendChild(sp);
-    }
-    qgrid.appendChild(row);
+    qcells.appendChild(rowEl);
   }
 }
 
@@ -1675,7 +1885,6 @@ function renderPanel() {
   renderLastRace();
   renderInsights();
   renderChips();
-  renderBetList();
   renderPanelFooter();
 }
 
@@ -1866,62 +2075,51 @@ function renderInsights() {
   const el = document.getElementById('panel-insights');
   if (!el) return;
   if (insightTimer) { clearInterval(insightTimer); insightTimer = null; }
-  const insights   = getInsights();
-  const totalPages = Math.ceil(insights.length / 2) || 1;
-  insightPageIdx   = insightPageIdx % totalPages;
+  const insights = getInsights();
 
   el.innerHTML = `<div class="insight-label">馬匹情報</div><div class="insight-wrap" id="insight-cards"></div>`;
 
+  const wrap = document.getElementById('insight-cards');
   if (insights.length === 0) {
-    el.querySelector('.insight-wrap').innerHTML = `<div class="insight-empty">累積場次中⋯</div>`;
+    wrap.innerHTML = `<div class="insight-empty">累積場次中⋯</div>`;
     return;
   }
-  showInsightPage(insights, insightPageIdx);
-  if (insights.length > 2) {
-    insightTimer = setInterval(() => {
-      insightPageIdx = (insightPageIdx + 1) % totalPages;
-      showInsightPage(insights, insightPageIdx);
-    }, 4000);
-  }
-}
-
-function showInsightPage(insights, idx) {
-  const wrap = document.getElementById('insight-cards');
-  if (!wrap) return;
-  const slice = insights.slice(idx * 2, idx * 2 + 2);
-  wrap.innerHTML = slice.map(ins => {
-    const h = ins.horse;
+  wrap.innerHTML = insights.map(ins => {
+    const h     = ins.horse;
     const color = h?.color || '#fff';
     const name  = h?.name  || '—';
     const silk  = h?.silk  || '🐴';
     return `<div class="insight-card">
-      <div class="ic-badge-row">
+      <div class="ic-left">
         <div class="ic-icon">${ins.icon}</div>
+        <div class="ic-portrait-wrap">
+          <img class="ic-portrait" src="./馬頭像/${name}.png" style="border-color:${color}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ic-portrait-fallback" style="background:${color}22;border-color:${color}">${silk}</div>
+        </div>
+      </div>
+      <div class="ic-right">
         <div class="ic-title">${ins.title}</div>
+        <div class="ic-horse" style="color:${color}">${name}</div>
+        <div class="ic-desc">${ins.desc}</div>
       </div>
-      <div class="ic-portrait-wrap">
-        <img class="ic-portrait" src="./馬頭像/${name}.png" style="border-color:${color}"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="ic-portrait-fallback" style="background:${color}22;border-color:${color}">${silk}</div>
-      </div>
-      <div class="ic-horse" style="color:${color}">${name}</div>
-      <div class="ic-desc">${ins.desc}</div>
     </div>`;
   }).join('');
 }
 
 function renderChips() {
-  const el = document.getElementById('panel-chips');
+  const el = document.getElementById('bb-chips');
   if (!el) return;
-  el.innerHTML = `<div class="pc-label">選擇籌碼</div><div class="pc-btns" id="pc-btns-wrap"></div>`;
-  const wrap = document.getElementById('pc-btns-wrap');
+  el.innerHTML = '';
   CFG.CHIPS.forEach(c => {
     const lbl = c >= 1000 ? (c/1000) + 'K' : c;
     const btn = document.createElement('button');
-    btn.className = 'pc-chip' + (S.chipAmt === c ? ' active' : '');
-    btn.textContent = '$' + lbl;
+    btn.className = 'bb-chip' + (S.chipAmt === c ? ' active' : '');
+    btn.dataset.chip = c;
+    btn.textContent = lbl;
+    btn.title = '$' + c.toLocaleString();
     btn.addEventListener('click', () => { S.chipAmt = c; renderChips(); });
-    wrap.appendChild(btn);
+    el.appendChild(btn);
   });
 }
 
@@ -2087,7 +2285,7 @@ function skipRace() {
 const RACE_START_PCT  = 6;
 const RACE_FINISH_PCT = 82;
 // 7 道的垂直位置（% of #ro-track 高度）
-const RACE_LANE_TOPS  = [54, 58, 62, 66, 70, 74, 78];
+const RACE_LANE_TOPS  = [48, 54, 60, 66, 72, 78, 84];
 
 let raceAnimId    = null;
 let racePositions = {};   // h.pos → current left%
@@ -2319,7 +2517,8 @@ function startRace() {
   overlay.classList.add('active');
 
   buildRaceBackground();
-  document.querySelectorAll('.ro-horse-wrap, .race-rank-marker').forEach(e => e.remove());
+  document.querySelectorAll('.ro-horse-wrap').forEach(e => e.remove());
+  document.getElementById('finish-results').innerHTML = '';
 
   // ── 預先模擬（結果已定，存入 S.raceOrder 供跳過使用）──
   const order = simulateRace(S.horses);
@@ -2349,9 +2548,8 @@ function startRace() {
     num.style.cssText = `color:${h.color};border-color:${h.color};background:${h.color}33;`;
     num.textContent = h.pos;
     const emoji = document.createElement('div');
-    emoji.className = 'ro-horse-emoji';
+    emoji.className = 'ro-horse-sprite';
     emoji.id = 'ro-emoji-' + h.pos;
-    emoji.textContent = '🐎';
     const name  = document.createElement('div');
     name.className = 'ro-horse-name';
     name.textContent = (h.isGolden ? '♔ ' : '') + h.name;
@@ -2499,21 +2697,43 @@ function showCountdown(onComplete) {
   tick();
 }
 
-function showFinishMarker(h, rank) {
-  const RANK_LABELS = ['1st','2nd','3rd','4th','5th','6th','7th'];
-  const RANK_COLORS = ['#ffd700','#c0c0c0','#cd7f32'];
-  const horseIdx = [...S.horses].sort((a,b)=>a.pos-b.pos).findIndex(x=>x.pos===h.pos);
-  const laneTop  = RACE_LANE_TOPS[horseIdx];
-  const rankColor = rank <= 3 ? RANK_COLORS[rank-1] : h.color;
+const _RANK_LABELS = ['1st','2nd','3rd','4th','5th','6th','7th'];
+const _RANK_COLORS = ['#ffd700','#c0c0c0','#cd7f32'];
 
-  const marker = document.createElement('div');
-  marker.className = 'race-rank-marker';
-  marker.style.cssText = `left:${RACE_FINISH_PCT}%;top:${laneTop}%;border-color:${h.color}88;`;
-  marker.innerHTML = `
-    <span class="rrm-rank" style="color:${rankColor}">${RANK_LABELS[rank-1]}</span>
-    <span class="rrm-num" style="background:${h.color}33;border-color:${h.color};color:${h.color}">${h.pos}</span>
-    <span class="rrm-name" style="color:${h.color}">${h.name}</span>`;
-  document.getElementById('ro-track').appendChild(marker);
+function initFinishPanel() {
+  const panel = document.getElementById('finish-results');
+  panel.innerHTML = '';
+  _RANK_LABELS.forEach((lbl, i) => {
+    const row = document.createElement('div');
+    row.id = `frm-slot-${i+1}`;
+    row.className = 'frm-row rank-other';
+    row.style.opacity = '.2';
+    row.innerHTML = `<span class="frm-rank" style="color:#3a4a60">${lbl}</span><span class="frm-name" style="color:#2a3850">—</span>`;
+    panel.appendChild(row);
+  });
+}
+
+function showFinishMarker(h, rank) {
+  const panel     = document.getElementById('finish-results');
+  const rankColor = rank <= 3 ? _RANK_COLORS[rank-1] : '#5a6a85';
+  const rowClass  = rank <= 3 ? `rank-${rank}` : 'rank-other';
+  const nameColor = rank <= 3 ? rankColor : '#6a7a95';
+
+  const row = document.createElement('div');
+  row.className    = `frm-row ${rowClass}`;
+  row.dataset.rank = rank;
+  row.innerHTML =
+    `<span class="frm-rank" style="color:${rankColor}">${_RANK_LABELS[rank-1]}</span>` +
+    `<span class="frm-num" style="background:${h.color}33;border-color:${h.color};color:${h.color}">${h.pos}</span>` +
+    `<span class="frm-name" style="color:${nameColor}">${h.name}</span>`;
+
+  // 按 rank 插入正確位置，不論過線先後
+  const existing = panel.querySelectorAll('.frm-row');
+  let inserted = false;
+  for (const r of existing) {
+    if (parseInt(r.dataset.rank) > rank) { panel.insertBefore(row, r); inserted = true; break; }
+  }
+  if (!inserted) panel.appendChild(row);
 }
 
 function onRaceEnd(order) {
@@ -2589,23 +2809,191 @@ function onRaceEnd(order) {
 }
 
 // ════════════════════════════════════
-// NEXT RACE
+// NEXT RACE — 多步驟結算流程
 // ════════════════════════════════════
+
+let _settleMode = null; // 'settle' | 'warn'
+
+// Step 1：玩家按「下一場」→ 關閉比賽覆蓋層，進入結算流程
 function nextRace() {
-  S.raceNum++;
-  S.bets=[];
-  S.result=null;
-  saveMachineData();
-  // 清除動畫與鏡頭
   if (raceAnimId) { cancelAnimationFrame(raceAnimId); raceAnimId = null; }
   if (camTimer)   { clearTimeout(camTimer); camTimer = null; }
   const trackEl = document.getElementById('ro-track');
   trackEl.style.transition = 'none';
   trackEl.style.transform  = 'none';
   document.getElementById('race-overlay').classList.remove('active');
-  initRace();
-  animateLastRace(); // 翻牌更新前三名
-  flashInsights();   // 金框閃爍更新情報
+
+  const savedResult = S.result;
+  const hasWin = savedResult && savedResult.totalWin > 0;
+
+  // Step 2：刷新賽事資訊面板
+  openInfoPanel();
+  animateLastRace();
+  flashInsights();
+
+  const FLIP_DONE  = 1200; // animateLastRace 最後一匹完成時間
+  const PANEL_FADE = 350;  // 資訊欄收合過渡時間
+  const FLASH_DUR  = 2000; // flash-win 4次 × 0.5s
+
+  // Step 2：翻牌結束後自動收合資訊欄
+  setTimeout(() => closeInfoPanel(), FLIP_DONE);
+
+  if (hasWin) {
+    // Step 3：資訊欄收合後閃爍中獎格
+    setTimeout(() => flashWinCells(savedResult), FLIP_DONE + PANEL_FADE);
+    // Step 4：閃爍結束後跳 Dialog
+    setTimeout(() => showSettleDialog(savedResult), FLIP_DONE + PANEL_FADE + FLASH_DUR + 150);
+  } else {
+    // 無中獎：資訊欄收合後直接跳 Dialog
+    setTimeout(() => showSettleDialog(savedResult), FLIP_DONE + PANEL_FADE + 150);
+  }
+}
+
+// 閃爍中獎格子（需要格子有 data-type / data-pos / data-pos-a / data-pos-b）
+function flashWinCells(result) {
+  if (!result) return;
+  const seen = new Set();
+  result.results.forEach(({bet, win}) => {
+    if (win <= 0) return;
+    let cell;
+    if (bet.type === 'QUINELLA') {
+      const [a, b] = bet.horses;
+      const key = [a,b].sort().join('-');
+      if (seen.has(key)) return; seen.add(key);
+      cell = document.querySelector(`[data-type="QUINELLA"][data-pos-a="${a}"][data-pos-b="${b}"]`)
+          || document.querySelector(`[data-type="QUINELLA"][data-pos-a="${b}"][data-pos-b="${a}"]`);
+    } else {
+      const key = bet.type + '-' + bet.horses[0];
+      if (seen.has(key)) return; seen.add(key);
+      cell = document.querySelector(`[data-type="${bet.type}"][data-pos="${bet.horses[0]}"]`);
+    }
+    if (cell) { cell.classList.remove('flash-win'); void cell.offsetWidth; cell.classList.add('flash-win'); }
+  });
+}
+
+// 噴硬幣動畫
+function spawnCoins(boxEl) {
+  const icons = ['💰','🪙','💵','✨','⭐'];
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'coin-p';
+      el.textContent = icons[Math.floor(Math.random() * icons.length)];
+      el.style.setProperty('--tx', ((Math.random() - 0.5) * 240) + 'px');
+      el.style.setProperty('--ty', ((Math.random() - 1.2) * 200) + 'px');
+      el.style.left = (20 + Math.random() * 60) + '%';
+      el.style.top  = (35 + Math.random() * 30) + '%';
+      el.style.animationDelay = (Math.random() * 0.35) + 's';
+      boxEl.appendChild(el);
+      setTimeout(() => el.remove(), 1300);
+    }, i * 45);
+  }
+}
+
+// 顯示結算 Dialog（三種）
+function showSettleDialog(result) {
+  const overlay = document.getElementById('settle-overlay');
+  const box     = document.getElementById('settle-box');
+  const iconEl  = document.getElementById('sd-icon');
+  const titleEl = document.getElementById('sd-title');
+  const amtEl   = document.getElementById('sd-amount');
+  const subEl   = document.getElementById('sd-sub');
+  const btnEl   = document.getElementById('sd-btn');
+
+  // 重置
+  box.className = 'settle-box';
+  titleEl.className = 'sd-title';
+  amtEl.className   = 'sd-amount';
+  btnEl.className   = 'sd-btn';
+  amtEl.textContent = '';
+  subEl.textContent = '';
+
+  const totalWin    = result ? result.totalWin : 0;
+  const hasFirstWin = result && result.results.some(r => r.win > 0 && r.bet.type === 'WIN');
+
+  if (totalWin <= 0) {
+    iconEl.textContent  = '😔';
+    titleEl.textContent = '本局未中彩';
+    subEl.textContent   = '再接再厲！';
+  } else if (hasFirstWin) {
+    box.classList.add('gold-box');
+    iconEl.textContent  = '🏆';
+    titleEl.classList.add('gold');
+    titleEl.textContent = '獨贏！彩金出擊！';
+    amtEl.classList.add('gold');
+    amtEl.textContent   = '+$' + Math.round(totalWin).toLocaleString();
+    setTimeout(() => spawnCoins(box), 120);
+  } else {
+    box.classList.add('win-box');
+    iconEl.textContent  = '🎉';
+    titleEl.textContent = '中彩！';
+    amtEl.textContent   = '+$' + Math.round(totalWin).toLocaleString();
+    setTimeout(() => spawnCoins(box), 120);
+  }
+
+  _settleMode = 'settle';
+  overlay.classList.add('active');
+}
+
+// 資產不足 Dialog
+function showInsufficientDialog() {
+  const overlay = document.getElementById('settle-overlay');
+  const box     = document.getElementById('settle-box');
+  const iconEl  = document.getElementById('sd-icon');
+  const titleEl = document.getElementById('sd-title');
+  const amtEl   = document.getElementById('sd-amount');
+  const subEl   = document.getElementById('sd-sub');
+  const btnEl   = document.getElementById('sd-btn');
+
+  box.className     = 'settle-box warn-box';
+  titleEl.className = 'sd-title warn';
+  btnEl.className   = 'sd-btn warn';
+  iconEl.textContent  = '⚠️';
+  titleEl.textContent = '籌碼不足';
+  amtEl.textContent   = '';
+  subEl.textContent   = '無法重複上局投注，已自動取消';
+
+  _settleMode = 'warn';
+  overlay.classList.add('active');
+}
+
+// 玩家點擊 Dialog 按鈕
+function onSettleConfirm() {
+  document.getElementById('settle-overlay').classList.remove('active');
+  const mode = _settleMode;
+  _settleMode = null;
+  if (mode === 'settle') doNextRace();
+}
+
+// 實際初始化下一局（含自動重複下注檢查）
+function doNextRace() {
+  S.raceNum++;
+  saveMachineData();
+  initRace(); // 新馬、清注單、渲染
+}
+
+function openInfoPanel() {
+  const panel   = document.getElementById('info-panel');
+  const overlay = document.getElementById('info-overlay');
+  const btn     = document.getElementById('btn-info-toggle');
+  panel.classList.add('open');
+  overlay.classList.add('active');
+  if (btn) btn.classList.add('open');
+}
+
+function closeInfoPanel() {
+  const panel   = document.getElementById('info-panel');
+  const overlay = document.getElementById('info-overlay');
+  const btn     = document.getElementById('btn-info-toggle');
+  panel.classList.remove('open');
+  overlay.classList.remove('active');
+  if (btn) btn.classList.remove('open');
+}
+
+function toggleInfoPanel() {
+  const panel = document.getElementById('info-panel');
+  if (panel.classList.contains('open')) closeInfoPanel();
+  else openInfoPanel();
 }
 
 // ════════════════════════════════════
@@ -2828,6 +3216,31 @@ function initRace() {
 initMachine();
 initSessionHorses(); // 本 session 固定 7 匹馬，F5 才重抽
 initRace();
+
+// ── Horse sprite animation — JS-driven, no CSS animation bugs ──
+(function(){
+  let frame = 0;
+  const FRAMES   = 6;
+  const FRAME_W  = 52; // matches .ro-horse-sprite width in px
+  setInterval(() => {
+    frame = (frame + 1) % FRAMES;
+    const pos = (-frame * FRAME_W) + 'px 0';
+    document.querySelectorAll('.ro-horse-sprite').forEach(el => {
+      el.style.backgroundPosition = pos;
+    });
+  }, 83); // ~12 fps
+})();
 </script>
+
+<!-- 結算 Dialog（fixed overlay，蓋在最上層）-->
+<div id="settle-overlay" class="settle-overlay">
+  <div class="settle-box" id="settle-box">
+    <div id="sd-icon"   class="sd-icon"></div>
+    <div id="sd-title"  class="sd-title"></div>
+    <div id="sd-amount" class="sd-amount"></div>
+    <div id="sd-sub"    class="sd-sub"></div>
+    <button class="sd-btn" id="sd-btn" onclick="onSettleConfirm()">繼續</button>
+  </div>
+</div>
 </body>
 </html>

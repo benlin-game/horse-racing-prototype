@@ -1,1 +1,4 @@
 .claude/
+gen_tools/.apikey
+*.mp4
+BUG.png

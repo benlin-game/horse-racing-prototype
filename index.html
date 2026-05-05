@@ -114,7 +114,7 @@
       min-width:0; background:var(--bg-card); position:relative;
     }
     .tl-img-cell:last-child { border-right:none; }
-    .tl-img-cell.golden { background:var(--golden-bg); animation:goldenPulse 2s infinite; }
+
     .tl-num-badge {
       width:clamp(14px,2vw,22px); height:clamp(14px,2vw,22px);
       border-radius:50%; border:2px solid currentColor;
@@ -126,10 +126,8 @@
       width:clamp(40px,6vw,72px); height:clamp(40px,6vw,72px);
       object-fit:contain; border-radius:4px; border:2px solid;
     }
-    .tl-img-cell.golden .tl-portrait { box-shadow:0 0 8px 2px rgba(255,215,0,.5); }
     .tl-golden-crown {
-      position:absolute; top:4%; right:5%;
-      font-size:clamp(7px,.88vw,11px); animation:blink 1.2s infinite alternate;
+      display:none;
     }
 
     /* 馬名格 */
@@ -229,6 +227,127 @@
       35%,65% { background:rgba(46,204,113,.22); outline:2px solid #2ecc71; }
     }
     .flash-win { animation:flash-win .5s ease-in-out 4; }
+
+    /* ── 特殊馬格子亮框動畫 ── */
+    @keyframes flash-special-golden {
+      0%,100% { background:inherit; outline:none; box-shadow:none; }
+      20%,60% { background:rgba(255,215,0,.20); outline:2px solid #ffd700; box-shadow:0 0 14px rgba(255,215,0,.55); }
+      40%,80% { background:rgba(255,215,0,.10); outline:1px solid rgba(255,215,0,.5); box-shadow:none; }
+    }
+    @keyframes flash-special-black {
+      0%,100% { background:inherit; outline:none; box-shadow:none; }
+      20%,60% { background:rgba(170,170,255,.18); outline:2px solid #aaaaee; box-shadow:0 0 14px rgba(130,130,255,.55); }
+      40%,80% { background:rgba(130,130,255,.08); outline:1px solid rgba(130,130,255,.45); box-shadow:none; }
+    }
+    @keyframes flash-special-double {
+      0%,100% { background:inherit; outline:none; box-shadow:none; }
+      20%,60% { background:rgba(200,160,255,.18); outline:2px solid #cc88ff; box-shadow:0 0 14px rgba(200,160,255,.55); }
+      40%,80% { background:rgba(200,160,255,.08); outline:1px solid rgba(200,160,255,.45); box-shadow:none; }
+    }
+    .flash-special-golden { animation:flash-special-golden 1.5s ease-in-out forwards; }
+    .flash-special-black  { animation:flash-special-black  1.5s ease-in-out forwards; }
+    .flash-special-double { animation:flash-special-double 1.5s ease-in-out forwards; }
+
+    /* ── 特殊馬揭曉 Overlay ── */
+    #special-reveal-overlay {
+      position:fixed; inset:0; z-index:210;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none;
+      transition:opacity .3s;
+    }
+    #special-reveal-overlay.active { opacity:1; pointer-events:all; }
+    #special-reveal-overlay .sr-backdrop {
+      position:absolute; inset:0;
+    }
+    .sr-backdrop-golden { background:radial-gradient(ellipse at center, rgba(80,60,0,.92) 0%, rgba(0,0,0,.88) 100%); }
+    .sr-backdrop-black  { background:radial-gradient(ellipse at center, rgba(10,10,30,.95) 0%, rgba(0,0,0,.92) 100%); }
+    .special-reveal-box {
+      position:relative; z-index:1;
+      border-radius:16px; padding:5% 6%;
+      text-align:center; min-width:clamp(200px,38vw,420px);
+      box-shadow:0 0 60px 20px var(--sr-glow);
+      animation:sr-appear .4s cubic-bezier(.17,.67,.35,1.3) forwards;
+    }
+    @keyframes sr-appear {
+      from { opacity:0; transform:scale(.7); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    .golden-horse-box {
+      --sr-glow: rgba(255,215,0,.5);
+      background:linear-gradient(160deg,#2a1f00 0%,#1a1300 100%);
+      border:2px solid #ffd700;
+    }
+    .black-horse-box {
+      --sr-glow: rgba(160,160,255,.45);
+      background:linear-gradient(160deg,#0e0e22 0%,#05050f 100%);
+      border:2px solid #8888cc;
+    }
+    .double-horse-box {
+      --sr-glow: rgba(220,180,255,.55);
+      background:linear-gradient(160deg,#1a1200 30%,#0c0c20 100%);
+      border:2px solid;
+      border-color:#ffd700;
+      box-shadow:0 0 0 1px #8888cc inset;
+    }
+    .sr-double-row {
+      display:flex; gap:8%; justify-content:center; margin-bottom:3%;
+    }
+    .sr-double-card {
+      flex:1; max-width:42%;
+      border-radius:8px; padding:4% 3%;
+      text-align:center;
+    }
+    .sr-double-card.golden { background:rgba(255,215,0,.1); border:1px solid #ffd700; }
+    .sr-double-card.black  { background:rgba(130,130,255,.1); border:1px solid #8888cc; }
+    .sr-double-card .dc-label { font-size:clamp(7px,.9vw,11px); font-weight:700; margin-bottom:4%; }
+    .sr-double-card.golden .dc-label { color:#ffd700; }
+    .sr-double-card.black  .dc-label { color:#aaaaee; }
+    .sr-double-card .dc-horse { font-size:clamp(9px,1.2vw,15px); font-weight:800; color:#fff; margin-bottom:3%; }
+    .sr-double-card .dc-odds  { font-family:'Courier New',monospace; font-weight:900;
+                                  font-size:clamp(16px,2.5vw,32px); }
+    .sr-double-card.golden .dc-odds { color:#ffd700; text-shadow:0 0 10px #ffd700; }
+    .sr-double-card.black  .dc-odds { color:#ccccff; text-shadow:0 0 10px #8888ff; }
+    .sr-q-highlight {
+      font-size:clamp(9px,1.3vw,16px); font-weight:700; color:#fff;
+      margin-bottom:2%; letter-spacing:.04em;
+    }
+    .sr-q-odds {
+      font-family:'Courier New',monospace; font-weight:900;
+      font-size:clamp(28px,4.5vw,58px); color:#e0c0ff;
+      text-shadow:0 0 20px #cc88ff; line-height:1; margin-bottom:3%;
+    }
+    @keyframes sr-pulse-double {
+      0%,100% { box-shadow:0 0 60px 20px rgba(200,160,255,.45); }
+      50%      { box-shadow:0 0 90px 35px rgba(200,160,255,.75); }
+    }
+    .double-horse-box { animation:sr-appear .4s cubic-bezier(.17,.67,.35,1.3) forwards, sr-pulse-double 1.8s 0.4s ease-in-out infinite; }
+    .sr-icon    { font-size:clamp(36px,6vw,64px); line-height:1.1; margin-bottom:4%; }
+    .sr-label   { font-size:clamp(10px,1.6vw,18px); font-weight:700; letter-spacing:.08em; margin-bottom:3%; }
+    .golden-horse-box .sr-label { color:#ffd700; }
+    .black-horse-box  .sr-label { color:#aaaaee; }
+    .sr-horse   { font-size:clamp(13px,2vw,24px); font-weight:800; color:#fff; margin-bottom:2%; }
+    .sr-odds    { font-family:'Courier New',monospace; font-weight:900; line-height:1;
+                  font-size:clamp(32px,5.5vw,70px); margin-bottom:3%; }
+    .golden-horse-box .sr-odds { color:#ffd700; text-shadow:0 0 18px #ffd700; }
+    .black-horse-box  .sr-odds { color:#ccccff; text-shadow:0 0 18px #8888ff; }
+    .sr-sub     { font-size:clamp(7px,1vw,12px); opacity:.65; color:#ccc; margin-bottom:4%; }
+    .sr-hint    { font-size:clamp(6px,.85vw,10px); opacity:.4; color:#999; }
+    @keyframes sr-pulse-gold {
+      0%,100% { box-shadow:0 0 60px 20px rgba(255,215,0,.5); }
+      50%      { box-shadow:0 0 80px 30px rgba(255,215,0,.8); }
+    }
+    @keyframes sr-pulse-black {
+      0%,100% { box-shadow:0 0 60px 20px rgba(130,130,255,.4); }
+      50%      { box-shadow:0 0 90px 35px rgba(130,130,255,.7); }
+    }
+    .golden-horse-box { animation:sr-appear .4s cubic-bezier(.17,.67,.35,1.3) forwards, sr-pulse-gold 1.8s 0.4s ease-in-out infinite; }
+    .black-horse-box  { animation:sr-appear .4s cubic-bezier(.17,.67,.35,1.3) forwards, sr-pulse-black 1.8s 0.4s ease-in-out infinite; }
+
+    /* 跑馬道特殊馬光暈 */
+    .ro-horse-wrap.special-golden .ro-horse-sprite { filter:drop-shadow(0 0 8px #ffd700) drop-shadow(0 0 4px #fff); }
+    .ro-horse-wrap.special-black  .ro-horse-sprite { filter:drop-shadow(0 0 8px #aaaaff) drop-shadow(0 0 4px #fff); }
+    .ro-horse-wrap.special-golden .ro-horse-name { color:#ffd700 !important; font-weight:900; }
+    .ro-horse-wrap.special-black  .ro-horse-name { color:#ccccff !important; font-weight:900; }
 
     /* ── 結算 Dialog ── */
     .settle-overlay {
@@ -824,10 +943,7 @@
       60% { transform:scale(1.3) translateY(-15px); opacity:1; }
       100%{ transform:scale(1) translateY(-30px); opacity:0; }
     }
-    @keyframes goldenPulse {
-      0%,100%{ box-shadow:0 0 6px 1px rgba(255,215,0,.25); }
-      50%    { box-shadow:0 0 16px 3px rgba(255,215,0,.55); }
-    }
+
 
     /* ── BET BADGE (舊殘留已整合至 cell-tl，此段保留空白佔位）── */
 
@@ -1285,14 +1401,26 @@
 // ════════════════════════════════════
 const CFG = {
   RACE_DUR:        9000,
-  GOLDEN_CHANCE:   0.20,
-  GOLDEN_MIN:      35,
-  GOLDEN_MAX:      80,
+
   INIT_BALANCE:    10000,
   CHIPS:           [100, 500, 1000, 5000, 10000],
   RTP_WIN:         0.93,   // 獨贏 RTP 93%
   RTP_PLACE:       0.94,   // 位置 RTP 94%
   RTP_QUINELLA:    0.90,   // 連贏 RTP 90%
+  // 黃金馬 / 黑金馬（投注後揭曉，保證第一）
+  GOLDEN_HORSE_CHANCE: 0.06,   // 黃金馬觸發率 6%
+  BLACK_HORSE_CHANCE:  0.015,  // 黑金馬觸發率 1.5%
+  GOLDEN_HORSE_ODDS:   250,    // 黃金馬 獨贏固定賠率
+  GOLDEN_HORSE_PLACE:  100,    // 黃金馬 位置固定賠率
+  BLACK_HORSE_ODDS:    350,    // 黑金馬 獨贏固定賠率
+  BLACK_HORSE_PLACE:   150,    // 黑金馬 位置固定賠率
+  // 雙馬事件（黃金馬+黑金馬同時出現）
+  DOUBLE_HORSE_CHANCE:       0.005, // 0.5%
+  DOUBLE_HORSE_GOLDEN_ODDS:  80,    // 雙馬 黃金馬 獨贏賠率
+  DOUBLE_HORSE_GOLDEN_PLACE: 20,    // 雙馬 黃金馬 位置賠率
+  DOUBLE_HORSE_BLACK_ODDS:   120,   // 雙馬 黑金馬 獨贏賠率
+  DOUBLE_HORSE_BLACK_PLACE:  30,    // 雙馬 黑金馬 位置賠率
+  DOUBLE_HORSE_Q_ODDS:       500,   // 雙馬 連贏固定賠率
 };
 
 // ════════════════════════════════════
@@ -1361,21 +1489,12 @@ function generateBootstrapHistory(id) {
       const tp    = weights[idx] / wSum;
       const noise = 0.98 + rng() * 0.04;
       return { id:h.id, name:h.name, color:h.color, silk:h.silk,
-               pos:idx+1, trueProb:tp, isGolden:false,
+               pos:idx+1, trueProb:tp,
                winOdds: +(1/tp * CFG.RTP_WIN * noise).toFixed(1) };
     });
 
-    let goldenPos = null;
-    if (rng() < CFG.GOLDEN_CHANCE) {
-      const cands = horses.filter(h => h.trueProb <= 0.20);
-      const pool  = cands.length ? cands : horses;
-      const t     = pool[Math.floor(rng() * pool.length)];
-      const gOdds = CFG.GOLDEN_MIN + Math.floor(rng() * (CFG.GOLDEN_MAX - CFG.GOLDEN_MIN + 1));
-      t.winOdds = gOdds; t.isGolden = true; goldenPos = t.pos;
-    }
-
     const order = seededSimRace(horses, rng);
-    history.push({ raceNum:i+1, order:[...order], goldenPos, winnerWinOdds:order[0].winOdds });
+    history.push({ raceNum:i+1, order:[...order], winnerWinOdds:order[0].winOdds });
   }
 
   return history.reverse(); // 最新場在最前面
@@ -1421,15 +1540,24 @@ const S = {
   phase:       'BETTING',   // BETTING | RACING | RESULT
   raceNum:     1,
   horses:      [],          // 7 active horses this race
-  goldenPos:    null,
+
   bets:        [],          // 已下注（點格即存入，骰寶式）
   chipAmt:     100,
   balance:     CFG.INIT_BALANCE,
   result:      null,
-  forceGolden: false,
+
   lastBets:    [],          // 上場注單（重複下注用，存 {type, horseIds, amount, odds}）
   history:     [],          // max 50 entries: {raceNum, order, goldenPos, winnerWinOdds}
-  raceScript:  null,        // 1–5，本場選中的劇本
+  raceScript:   null,        // 1–5，本場選中的劇本
+  specialHorse:    null,   // 第一匹特殊馬（單馬事件=唯一；雙馬事件=第一名）
+  specialType:     null,   // 'GOLDEN' | 'BLACK' | null
+  specialHorse2:   null,   // 雙馬事件第二名特殊馬
+  specialType2:    null,
+  doubleEvent:     false,  // 是否為雙馬事件
+  doubleQOdds:     null,   // 雙馬事件連贏賠率
+  forceGoldenHorse: false,
+  forceBlackHorse:  false,
+  forceDoubleHorse: false,
 };
 
 // ════════════════════════════════════
@@ -1645,7 +1773,6 @@ function pickHorses() {
       trueProb:  tp,
       winOdds:   +(1/tp * CFG.RTP_WIN * noise).toFixed(1),
       placeOdds: 0,
-      isGolden:  false,
       finalPos:  null,
     };
   });
@@ -1660,40 +1787,161 @@ function pickHorses() {
   return horses;
 }
 
-function applyGolden(horses) {
-  S.goldenPos = null;
-  if (!S.forceGolden && Math.random() >= CFG.GOLDEN_CHANCE) return horses;
 
-  // 只從非熱門馬中選（勝率 ≤ 20%），避免熱門馬突然變超高賠率
-  const pool = horses.filter(h => h.trueProb <= 0.20);
-  const t    = (pool.length > 0 ? pool : horses)[Math.floor(Math.random() * (pool.length || horses.length))];
+// ── 特殊馬事件：投注確認後觸發 ──
+function checkAndApplySpecialHorse() {
+  S.specialHorse  = null; S.specialType  = null;
+  S.specialHorse2 = null; S.specialType2 = null;
+  S.doubleEvent   = false; S.doubleQOdds  = null;
 
-  // 決定彩金馬顯示賠率（35–80x），反推真實勝率
-  const goldenWinOdds = CFG.GOLDEN_MIN + Math.floor(Math.random() * (CFG.GOLDEN_MAX - CFG.GOLDEN_MIN + 1));
-  const newTP = CFG.RTP_WIN / goldenWinOdds;
-
-  // 按比例重新分配其他馬的真實勝率，確保總和 = 1
-  const oldTP       = t.trueProb;
-  const scaleOthers = (1 - newTP) / (1 - oldTP);
-  horses.forEach(h => {
-    if (h === t) {
-      h.trueProb  = newTP;
-      h.winOdds   = goldenWinOdds;
-      h.isGolden  = true;
+  let type, minOdds, maxOdds;
+  if (S.forceDoubleHorse) {
+    return applyDoubleHorseEvent();
+  } else if (S.forceBlackHorse) {
+    type = 'BLACK';  minOdds = CFG.BLACK_HORSE_MIN;  maxOdds = CFG.BLACK_HORSE_MAX;
+  } else if (S.forceGoldenHorse) {
+    type = 'GOLDEN'; minOdds = CFG.GOLDEN_HORSE_MIN; maxOdds = CFG.GOLDEN_HORSE_MAX;
+  } else {
+    const r = Math.random();
+    if (r < CFG.DOUBLE_HORSE_CHANCE) {
+      return applyDoubleHorseEvent();
+    } else if (r < CFG.DOUBLE_HORSE_CHANCE + CFG.BLACK_HORSE_CHANCE) {
+      type = 'BLACK';  minOdds = CFG.BLACK_HORSE_MIN;  maxOdds = CFG.BLACK_HORSE_MAX;
+    } else if (r < CFG.DOUBLE_HORSE_CHANCE + CFG.BLACK_HORSE_CHANCE + CFG.GOLDEN_HORSE_CHANCE) {
+      type = 'GOLDEN'; minOdds = CFG.GOLDEN_HORSE_MIN; maxOdds = CFG.GOLDEN_HORSE_MAX;
     } else {
-      h.trueProb = h.trueProb * scaleOthers;
-      h.winOdds  = +(1/h.trueProb * CFG.RTP_WIN).toFixed(1);
+      return false;
+    }
+  }
+
+  // 單馬事件：優先從低勝率馬中選
+  const pool   = S.horses.filter(h => h.trueProb <= 0.20);
+  const source = pool.length > 0 ? pool : S.horses;
+  const target = source[Math.floor(Math.random() * source.length)];
+
+  const winOdds   = type === 'GOLDEN' ? CFG.GOLDEN_HORSE_ODDS  : CFG.BLACK_HORSE_ODDS;
+  const placeOdds = type === 'GOLDEN' ? CFG.GOLDEN_HORSE_PLACE : CFG.BLACK_HORSE_PLACE;
+  target.specialOdds      = winOdds;
+  target.specialPlaceOdds = placeOdds;
+  target.specialType = type;
+
+  S.bets.forEach(bet => {
+    if (bet.type === 'WIN'   && bet.horses[0] === target.pos) { bet.odds = winOdds;   bet.isSpecial = true; }
+    if (bet.type === 'PLACE' && bet.horses[0] === target.pos) { bet.odds = placeOdds; bet.isSpecial = true; }
+  });
+
+  S.specialHorse = target;
+  S.specialType  = type;
+  return true;
+}
+
+function applyDoubleHorseEvent() {
+  // 選兩匹不同的低勝率馬
+  const pool    = S.horses.filter(h => h.trueProb <= 0.20);
+  const source  = pool.length >= 2 ? pool : S.horses;
+  const shuffled = [...source].sort(() => Math.random() - 0.5);
+  const horseA  = shuffled[0];
+  const horseB  = shuffled.find(h => h.pos !== horseA.pos) || S.horses.find(h => h.pos !== horseA.pos);
+
+  // 隨機決定名次：黃1黑2 或 黑1黃2
+  const goldenFirst = Math.random() < 0.5;
+  const goldenHorse = goldenFirst ? horseA : horseB;
+  const blackHorse  = goldenFirst ? horseB : horseA;
+
+  goldenHorse.specialOdds      = CFG.DOUBLE_HORSE_GOLDEN_ODDS;
+  goldenHorse.specialPlaceOdds = CFG.DOUBLE_HORSE_GOLDEN_PLACE;
+  goldenHorse.specialType = 'GOLDEN';
+  blackHorse.specialOdds       = CFG.DOUBLE_HORSE_BLACK_ODDS;
+  blackHorse.specialPlaceOdds  = CFG.DOUBLE_HORSE_BLACK_PLACE;
+  blackHorse.specialType  = 'BLACK';
+
+  const first  = goldenFirst ? goldenHorse : blackHorse;
+  const second = goldenFirst ? blackHorse  : goldenHorse;
+
+  // 升級 WIN / PLACE 下注 + 連贏那格
+  S.bets.forEach(bet => {
+    if (bet.type === 'WIN') {
+      if (bet.horses[0] === goldenHorse.pos) { bet.odds = CFG.DOUBLE_HORSE_GOLDEN_ODDS;  bet.isSpecial = true; }
+      if (bet.horses[0] === blackHorse.pos)  { bet.odds = CFG.DOUBLE_HORSE_BLACK_ODDS;   bet.isSpecial = true; }
+    } else if (bet.type === 'PLACE') {
+      if (bet.horses[0] === goldenHorse.pos) { bet.odds = CFG.DOUBLE_HORSE_GOLDEN_PLACE; bet.isSpecial = true; }
+      if (bet.horses[0] === blackHorse.pos)  { bet.odds = CFG.DOUBLE_HORSE_BLACK_PLACE;  bet.isSpecial = true; }
+    } else if (bet.type === 'QUINELLA') {
+      const s = new Set(bet.horses);
+      if (s.has(goldenHorse.pos) && s.has(blackHorse.pos)) { bet.odds = CFG.DOUBLE_HORSE_Q_ODDS; bet.isSpecial = true; }
     }
   });
 
-  // 重新用 Harville 算所有馬的位置賠率
-  horses.forEach(h => {
-    const pp    = calcPlaceProb(horses, h);
-    h.placeOdds = +(1/pp * CFG.RTP_PLACE).toFixed(1);
-  });
+  S.specialHorse  = first;   S.specialType  = first.specialType;
+  S.specialHorse2 = second;  S.specialType2 = second.specialType;
+  S.doubleEvent   = true;
+  S.doubleQOdds   = CFG.DOUBLE_HORSE_Q_ODDS;
+  return true;
+}
 
-  S.goldenPos = t.pos;
-  return horses;
+function showSpecialReveal(callback) {
+  const overlay  = document.getElementById('special-reveal-overlay');
+  const box      = document.getElementById('special-reveal-box');
+  const backdrop = document.getElementById('sr-backdrop');
+
+  if (S.doubleEvent) {
+    // ── 雙馬事件 ──
+    const goldenFirst = S.specialType === 'GOLDEN';
+    const golden = goldenFirst ? S.specialHorse : S.specialHorse2;
+    const black  = goldenFirst ? S.specialHorse2 : S.specialHorse;
+    const orderLabel = goldenFirst ? '黃金馬第1・黑金馬第2' : '黑金馬第1・黃金馬第2';
+
+    backdrop.className = 'sr-backdrop sr-backdrop-black';
+    box.className = 'special-reveal-box double-horse-box';
+    box.innerHTML = `
+      <div class="sr-icon">🌟</div>
+      <div class="sr-label" style="color:#e0c0ff;font-size:clamp(11px,1.8vw,20px);">【雙馬降臨！】</div>
+      <div class="sr-double-row">
+        <div class="sr-double-card golden">
+          <div class="dc-label">★ 黃金馬</div>
+          <div class="dc-horse">${golden.pos}號 ${golden.name}</div>
+          <div class="dc-odds">${CFG.DOUBLE_HORSE_GOLDEN_ODDS}x</div>
+          <div style="font-size:clamp(6px,.8vw,10px);opacity:.7;margin-top:3%;">位置 ${CFG.DOUBLE_HORSE_GOLDEN_PLACE}x</div>
+        </div>
+        <div class="sr-double-card black">
+          <div class="dc-label">♚ 黑金馬</div>
+          <div class="dc-horse">${black.pos}號 ${black.name}</div>
+          <div class="dc-odds">${CFG.DOUBLE_HORSE_BLACK_ODDS}x</div>
+          <div style="font-size:clamp(6px,.8vw,10px);opacity:.7;margin-top:3%;">位置 ${CFG.DOUBLE_HORSE_BLACK_PLACE}x</div>
+        </div>
+      </div>
+      <div class="sr-q-highlight">連贏特別賠率</div>
+      <div class="sr-q-odds">${S.doubleQOdds}x</div>
+      <div class="sr-sub">${orderLabel}・保證包辦前兩名！</div>
+      <div class="sr-hint">點擊任意處繼續</div>`;
+  } else {
+    // ── 單馬事件 ──
+    const isBlack = S.specialType === 'BLACK';
+    backdrop.className = 'sr-backdrop ' + (isBlack ? 'sr-backdrop-black' : 'sr-backdrop-golden');
+    box.className = 'special-reveal-box ' + (isBlack ? 'black-horse-box' : 'golden-horse-box');
+    box.innerHTML = `
+      <div class="sr-icon">${isBlack ? '🖤' : '✨'}</div>
+      <div class="sr-label">${isBlack ? '【黑金馬】降臨！' : '【黃金馬】出現！'}</div>
+      <div class="sr-horse">${S.specialHorse.pos}號 ${S.specialHorse.name}</div>
+      <div class="sr-odds">${S.specialHorse.specialOdds}x</div>
+      <div class="sr-sub">獨贏 ${S.specialHorse.specialOdds}x・位置 ${S.specialHorse.specialPlaceOdds}x</div>
+      <div class="sr-sub">${isBlack ? '黑金馬' : '黃金馬'}保證奪得第一名！</div>
+      <div class="sr-hint">點擊任意處繼續</div>`;
+  }
+
+  overlay.classList.add('active');
+
+  let dismissed = false;
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+    overlay.removeEventListener('click', dismiss);
+    overlay.classList.remove('active');
+    setTimeout(callback, 320);
+  }
+
+  const autoTimer = setTimeout(dismiss, 4200);
+  overlay.addEventListener('click', () => { clearTimeout(autoTimer); dismiss(); });
 }
 
 function calcQuinellaOdds(ha, hb) {
@@ -1774,13 +2022,12 @@ function renderToteBoard() {
   const imgsRow = clearRow('tl-imgs-row');
   sorted.forEach(h => {
     const cell = document.createElement('div');
-    cell.className = 'tl-img-cell' + (h.isGolden ? ' golden' : '');
+    cell.className = 'tl-img-cell';
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
       <img class="tl-portrait" src="./馬頭像/${h.name}.png"
-           style="border-color:${h.isGolden?'#ffd700':h.color};"
-           onerror="imgFallback(this,'${h.silk}','${h.name}','${h.isGolden}')">
-      ${h.isGolden ? '<span class="tl-golden-crown">♔</span>' : ''}`;
+           style="border-color:${h.color};"
+           onerror="imgFallback(this,'${h.silk}','${h.name}','false')">`;
     imgsRow.appendChild(cell);
   });
 
@@ -1789,7 +2036,7 @@ function renderToteBoard() {
   sorted.forEach(h => {
     const cell = document.createElement('div');
     cell.className = 'tl-name-cell';
-    cell.style.color = h.isGolden ? '#ffd700' : h.color;
+    cell.style.color = h.color;
     cell.textContent = h.name;
     namesRow.appendChild(cell);
   });
@@ -1798,9 +2045,9 @@ function renderToteBoard() {
   const winRow = clearRow('tl-win-row');
   sorted.forEach(h => {
     const wBet = cellBetTotal('WIN', [h.pos]);
-    const wCls = h.isGolden ? 'golden' : oddsClass(h.winOdds);
+    const wCls = oddsClass(h.winOdds);
     const cell = document.createElement('div');
-    cell.className = `tl-odds-cell${h.isGolden?' golden':''}${wBet>0?' sel':''}`;
+    cell.className = `tl-odds-cell${wBet>0?' sel':''}`;
     cell.dataset.type = 'WIN'; cell.dataset.pos = h.pos;
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
@@ -1814,9 +2061,9 @@ function renderToteBoard() {
   const placeRow = clearRow('tl-place-row');
   sorted.forEach(h => {
     const pBet = cellBetTotal('PLACE', [h.pos]);
-    const pCls = h.isGolden ? 'golden' : oddsClass(h.placeOdds);
+    const pCls = oddsClass(h.placeOdds);
     const cell = document.createElement('div');
-    cell.className = `tl-odds-cell${h.isGolden?' golden':''}${pBet>0?' sel':''}`;
+    cell.className = `tl-odds-cell${pBet>0?' sel':''}`;
     cell.dataset.type = 'PLACE'; cell.dataset.pos = h.pos;
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
@@ -1852,9 +2099,8 @@ function renderQuinellaGrid() {
       const [ha, hb] = pairs[idx];
       const odds   = calcQuinellaOdds(ha, hb);
       const betAmt = cellBetTotal('QUINELLA', [ha.pos, hb.pos]);
-      const hasG   = ha.isGolden || hb.isGolden;
       const cell   = document.createElement('div');
-      cell.className = `tl-q-cell${hasG?' golden':''}${betAmt>0?' sel':''}`;
+      cell.className = `tl-q-cell${betAmt>0?' sel':''}`;
       cell.dataset.type = 'QUINELLA'; cell.dataset.posA = ha.pos; cell.dataset.posB = hb.pos;
       cell.innerHTML = `
         <div class="tl-q-pair">
@@ -2268,7 +2514,12 @@ function cancelAll() {
 // ════════════════════════════════════
 function beginRace() {
   if (S.phase !== 'BETTING') return;
-  startRace();
+  const triggered = checkAndApplySpecialHorse();
+  if (triggered) {
+    showSpecialReveal(() => startRace());
+  } else {
+    startRace();
+  }
 }
 
 function skipRace() {
@@ -2522,6 +2773,19 @@ function startRace() {
 
   // ── 預先模擬（結果已定，存入 S.raceOrder 供跳過使用）──
   const order = simulateRace(S.horses);
+  // 特殊馬：強制名次
+  if (S.doubleEvent && S.specialHorse2) {
+    // 雙馬：specialHorse=第一、specialHorse2=第二
+    const i1 = order.findIndex(h => h.pos === S.specialHorse.pos);
+    if (i1 > 0) { const [s] = order.splice(i1, 1); order.unshift(s); }
+    const i2 = order.findIndex(h => h.pos === S.specialHorse2.pos);
+    if (i2 > 1) { const [s] = order.splice(i2, 1); order.splice(1, 0, s); }
+    order.forEach((h, i) => h.finalPos = i + 1);
+  } else if (S.specialHorse) {
+    const idx = order.findIndex(h => h.pos === S.specialHorse.pos);
+    if (idx > 0) { const [sp] = order.splice(idx, 1); order.unshift(sp); }
+    order.forEach((h, i) => h.finalPos = i + 1);
+  }
   S.raceOrder = order;
   // 劇本系統：依賠率條件選劇本，建立速度配置
   const PHASE_SWITCH = 55;
@@ -2534,13 +2798,33 @@ function startRace() {
   Object.assign(phase1Speeds, sp1);
   Object.assign(phase2Speeds, sp2);
 
+  // 特殊馬場次：覆蓋速度，確保視覺衝線順序與預定名次一致
+  if (S.specialHorse) {
+    const allP2 = Object.values(phase2Speeds);
+    const maxP2 = Math.max(...allP2);
+    phase2Speeds[order[0].pos] = maxP2 + 0.30;       // 第一名絕對最快
+    phase1Speeds[order[0].pos] = Math.max(phase1Speeds[order[0].pos] || 0.85, 0.88);
+    if (S.doubleEvent && S.specialHorse2) {
+      // 第二名：在第一名之外找最大值，再加0.15
+      const maxP2excl1 = Math.max(...Object.entries(phase2Speeds)
+        .filter(([k]) => Number(k) !== order[0].pos).map(([,v]) => v));
+      phase2Speeds[order[1].pos] = maxP2excl1 + 0.15;
+      phase1Speeds[order[1].pos] = Math.max(phase1Speeds[order[1].pos] || 0.85, 0.84);
+    }
+  }
+
   // ── 建立馬匹 DOM（靜止於起點）──
   racePositions = {};
   const track = document.getElementById('ro-track');
   [...S.horses].sort((a, b) => a.pos - b.pos).forEach((h, i) => {
     racePositions[h.pos] = RACE_START_PCT;
     const wrap  = document.createElement('div');
-    wrap.className = 'ro-horse-wrap' + (h.isGolden ? ' golden' : '');
+    const isSpecial1 = S.specialHorse  && h.pos === S.specialHorse.pos;
+    const isSpecial2 = S.specialHorse2 && h.pos === S.specialHorse2.pos;
+    const isSpecialH = isSpecial1 || isSpecial2;
+    const sType = isSpecial1 ? S.specialType : (isSpecial2 ? S.specialType2 : null);
+    const specialCls = isSpecialH ? (' special-' + sType.toLowerCase()) : '';
+    wrap.className = 'ro-horse-wrap' + specialCls;
     wrap.id = 'rr-' + h.pos;
     wrap.style.cssText = `left:${RACE_START_PCT}%;top:${RACE_LANE_TOPS[i]}%;color:${h.color};`;
     const num   = document.createElement('div');
@@ -2552,7 +2836,8 @@ function startRace() {
     emoji.id = 'ro-emoji-' + h.pos;
     const name  = document.createElement('div');
     name.className = 'ro-horse-name';
-    name.textContent = (h.isGolden ? '♔ ' : '') + h.name;
+    const specialPrefix = isSpecialH ? (sType === 'BLACK' ? '♚ ' : '★ ') : '';
+    name.textContent = specialPrefix + h.name;
     wrap.append(num, emoji, name);
     track.appendChild(wrap);
   });
@@ -2744,7 +3029,7 @@ function onRaceEnd(order) {
     const {totalWin, results} = calcPayout(S.bets, S.horses);
     S.result = {totalWin, results, order};
     if (totalWin>0) S.balance += totalWin;
-    S.history.unshift({ raceNum:S.raceNum, order:[...order], goldenPos:S.goldenPos, winnerWinOdds:order[0].winOdds });
+    S.history.unshift({ raceNum:S.raceNum, order:[...order], winnerWinOdds:order[0].winOdds });
     if (S.history.length>50) S.history.pop();
     saveMachineData();
     updateBal();
@@ -2752,13 +3037,23 @@ function onRaceEnd(order) {
 
     // ── Podium ──
     document.getElementById('ro-podium').innerHTML =
-      order.slice(0,3).map((h,i)=>`
-        <div class="ro-podium-item">
+      order.slice(0,3).map((h,i)=>{
+        let badge = '';
+        const sp1 = S.specialHorse  && h.pos === S.specialHorse.pos;
+        const sp2 = S.specialHorse2 && h.pos === S.specialHorse2.pos;
+        if (sp1 || sp2) {
+          const t  = sp1 ? S.specialType : S.specialType2;
+          const ic = t === 'BLACK' ? '♚' : '★';
+          const cl = t === 'BLACK' ? '#ccccff' : '#ffd700';
+          badge = `<span style="color:${cl};font-size:.85em;">${ic}</span>`;
+        }
+        return `<div class="ro-podium-item">
           <span>${['🥇','🥈','🥉'][i]}</span>
           <span class="ro-podium-dot" style="background:${h.color}"></span>
           <span style="color:${h.color}">${h.name}</span>
-          ${S.goldenPos===h.pos?'<span style="color:var(--color-golden);font-size:.85em;">♔</span>':''}
-        </div>`).join('');
+          ${badge}
+        </div>`;
+      }).join('');
 
     // ── Bet breakdown ──
     const TYPE_LABEL = {WIN:'獨贏', PLACE:'位置', QUINELLA:'連贏'};
@@ -2824,28 +3119,40 @@ function nextRace() {
   document.getElementById('race-overlay').classList.remove('active');
 
   const savedResult = S.result;
-  const hasWin = savedResult && savedResult.totalWin > 0;
+  const hasWin      = savedResult && savedResult.totalWin > 0;
+  const hasSpecial  = !!S.specialHorse;
 
-  // Step 2：刷新賽事資訊面板
+  // Step 1：刷新右側前三名 & 近期熱門，停留 1.5s
   openInfoPanel();
   animateLastRace();
   flashInsights();
 
-  const FLIP_DONE  = 1200; // animateLastRace 最後一匹完成時間
-  const PANEL_FADE = 350;  // 資訊欄收合過渡時間
-  const FLASH_DUR  = 2000; // flash-win 4次 × 0.5s
+  const PANEL_OPEN  = 2500; // 右側資訊可見時間
+  const PANEL_FADE  = 350;  // 收合過渡
+  const SPECIAL_DUR = 1500; // 特殊馬格子亮框動畫
+  const FLASH_DUR   = 2000; // flash-win 4次 × 0.5s
 
-  // Step 2：翻牌結束後自動收合資訊欄
-  setTimeout(() => closeInfoPanel(), FLIP_DONE);
+  setTimeout(() => closeInfoPanel(), PANEL_OPEN);
 
-  if (hasWin) {
-    // Step 3：資訊欄收合後閃爍中獎格
-    setTimeout(() => flashWinCells(savedResult), FLIP_DONE + PANEL_FADE);
-    // Step 4：閃爍結束後跳 Dialog
-    setTimeout(() => showSettleDialog(savedResult), FLIP_DONE + PANEL_FADE + FLASH_DUR + 150);
+  const t0 = PANEL_OPEN + PANEL_FADE; // 面板完全收合後
+
+  if (hasSpecial) {
+    // 黃金馬 / 黑金馬流程
+    setTimeout(() => flashSpecialCells(), t0);
+    if (hasWin) {
+      setTimeout(() => flashWinCells(savedResult),        t0 + SPECIAL_DUR);
+      setTimeout(() => showSettleDialog(savedResult),     t0 + SPECIAL_DUR + FLASH_DUR + 150);
+    } else {
+      setTimeout(() => showSettleDialog(savedResult),     t0 + SPECIAL_DUR + 150);
+    }
   } else {
-    // 無中獎：資訊欄收合後直接跳 Dialog
-    setTimeout(() => showSettleDialog(savedResult), FLIP_DONE + PANEL_FADE + 150);
+    // 一般流程
+    if (hasWin) {
+      setTimeout(() => flashWinCells(savedResult),        t0);
+      setTimeout(() => showSettleDialog(savedResult),     t0 + FLASH_DUR + 150);
+    } else {
+      setTimeout(() => showSettleDialog(savedResult),     t0 + 150);
+    }
   }
 }
 
@@ -2868,6 +3175,37 @@ function flashWinCells(result) {
       cell = document.querySelector(`[data-type="${bet.type}"][data-pos="${bet.horses[0]}"]`);
     }
     if (cell) { cell.classList.remove('flash-win'); void cell.offsetWidth; cell.classList.add('flash-win'); }
+  });
+}
+
+// 特殊馬格子亮框動畫（黃金/黑金/雙馬，不論玩家是否下注）
+function flashSpecialCells() {
+  if (!S.specialHorse) return;
+  const targets = [];
+
+  const addHorseCells = (horse) => {
+    if (!horse) return;
+    const cls = horse.specialType === 'GOLDEN' ? 'flash-special-golden' : 'flash-special-black';
+    const winCell   = document.querySelector(`[data-type="WIN"][data-pos="${horse.pos}"]`);
+    const placeCell = document.querySelector(`[data-type="PLACE"][data-pos="${horse.pos}"]`);
+    if (winCell)   targets.push({ cell: winCell,   cls });
+    if (placeCell) targets.push({ cell: placeCell, cls });
+  };
+
+  addHorseCells(S.specialHorse);
+  if (S.doubleEvent) {
+    addHorseCells(S.specialHorse2);
+    const a = S.specialHorse.pos, b = S.specialHorse2 ? S.specialHorse2.pos : -1;
+    const qCell = document.querySelector(`[data-type="QUINELLA"][data-pos-a="${a}"][data-pos-b="${b}"]`)
+               || document.querySelector(`[data-type="QUINELLA"][data-pos-a="${b}"][data-pos-b="${a}"]`);
+    if (qCell) targets.push({ cell: qCell, cls: 'flash-special-double' });
+  }
+
+  targets.forEach(({ cell, cls }) => {
+    cell.classList.remove('flash-special-golden','flash-special-black','flash-special-double');
+    void cell.offsetWidth;
+    cell.classList.add(cls);
+    setTimeout(() => cell.classList.remove(cls), 1550);
   });
 }
 
@@ -3125,7 +3463,6 @@ function renderHistory() {
 
   S.history.forEach(entry => {
     const tr = document.createElement('tr');
-    if (entry.goldenPos) tr.classList.add('hist-gold-row');
 
     // Race num cell
     const raceCell = `<td class="hist-race-num">#${entry.raceNum}</td>`;
@@ -3133,29 +3470,21 @@ function renderHistory() {
     // Horse cells for each position
     const horseCells = entry.order.map((h, i) => {
       const rankCls = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
-      const isGoldenHorse = h.pos === entry.goldenPos;
       return `<td>
         <span class="hist-horse-badge">
           <span class="hist-dot" style="background:${h.color}"></span>
           <span class="${rankCls}" style="color:var(--text-sub)">${h.name}</span>
-          ${isGoldenHorse ? '<span style="color:var(--color-golden);font-size:.85em;">♔</span>' : ''}
         </span>
       </td>`;
     }).join('');
 
-    // Notes cell
-    const noteCell = entry.goldenPos
-      ? `<td><span class="hist-gold-tag">♔ 彩金馬</span></td>`
-      : `<td style="color:var(--text-dim)">—</td>`;
-
+    const noteCell = `<td style="color:var(--text-dim)">—</td>`;
     tr.innerHTML = raceCell + horseCells + noteCell;
     tbody.appendChild(tr);
   });
 
   // Stats
   const total = S.history.length;
-  const goldenCount = S.history.filter(e => e.goldenPos).length;
-  // Most frequent 1st place horse
   const firstCount = {};
   S.history.forEach(e => {
     const name = e.order[0]?.name;
@@ -3167,8 +3496,6 @@ function renderHistory() {
   document.getElementById('hist-stats').innerHTML = `
     <div class="stat-item">已記錄 <span class="stat-val">${total}</span> / 50 場</div>
     <div style="width:1px;height:60%;background:var(--border)"></div>
-    <div class="stat-item">彩金馬場次 <span class="stat-val" style="color:var(--color-golden)">${goldenCount}</span> 場（${Math.round(goldenCount/total*100)}%）</div>
-    <div style="width:1px;height:60%;background:var(--border)"></div>
     <div class="stat-item">最常奪冠 <span class="stat-val">${topHorse ? topHorse[0]+' ('+topHorse[1]+'次)' : '—'}</span></div>`;
 }
 
@@ -3179,11 +3506,19 @@ function renderDbg() {
     <div style="color:var(--accent-gold);font-weight:700;margin-bottom:4px;">🛠 DEBUG</div>
     <div>Phase: <b>${S.phase}</b> | Race: #${S.raceNum}</div>
     <div>Balance: $${S.balance} | Bets: ${S.bets.length}</div>
-    <div>Golden: ${S.goldenPos?'馬 #'+S.goldenPos:'無'}</div>
+    <div>特殊馬: ${S.doubleEvent ? '雙馬 '+S.specialHorse?.pos+'★+'+S.specialHorse2?.pos+'♚ Q='+S.doubleQOdds+'x' : S.specialHorse ? (S.specialType==='BLACK'?'黑金馬':'黃金馬')+' 馬 #'+S.specialHorse.pos+' ('+S.specialHorse.specialOdds+'x)' : '無'}</div>
     <div>劇本: ${S.raceScript ? S.raceScript+' '+SCRIPT_NAMES[S.raceScript] : '—'}</div>
     <label style="cursor:pointer;display:block;margin-top:4px;">
-      <input type="checkbox" ${S.forceGolden?'checked':''} onchange="S.forceGolden=this.checked;renderDbg();">
-      強制彩金馬
+      <input type="checkbox" ${S.forceGoldenHorse?'checked':''} onchange="S.forceGoldenHorse=this.checked;renderDbg();">
+      強制黃金馬
+    </label>
+    <label style="cursor:pointer;display:block;margin-top:2px;">
+      <input type="checkbox" ${S.forceBlackHorse?'checked':''} onchange="S.forceBlackHorse=this.checked;renderDbg();">
+      強制黑金馬
+    </label>
+    <label style="cursor:pointer;display:block;margin-top:2px;">
+      <input type="checkbox" ${S.forceDoubleHorse?'checked':''} onchange="S.forceDoubleHorse=this.checked;renderDbg();">
+      強制雙馬事件
     </label>
     <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
       <button onclick="nextRace()" style="background:#333;border:1px solid #555;color:#ccc;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">跳下一場</button>
@@ -3202,11 +3537,14 @@ document.addEventListener('dblclick',()=>{
 // INIT
 // ════════════════════════════════════
 function initRace() {
-  S.horses   = applyGolden(pickHorses());
-  S.bets     = [];
-  S.result   = null;
-  S.phase    = 'BETTING';
-  S.raceOrder = null;
+  S.horses      = pickHorses();
+  S.bets        = [];
+  S.result      = null;
+  S.phase       = 'BETTING';
+  S.raceOrder       = null;
+  S.specialHorse  = null; S.specialType  = null;
+  S.specialHorse2 = null; S.specialType2 = null;
+  S.doubleEvent   = false; S.doubleQOdds  = null;
   document.getElementById('race-lbl').textContent = 'RACE ' + S.raceNum;
   updateBal();
   renderAll();
@@ -3231,6 +3569,19 @@ initRace();
   }, 83); // ~12 fps
 })();
 </script>
+
+<!-- 特殊馬揭曉 Overlay -->
+<div id="special-reveal-overlay">
+  <div class="sr-backdrop" id="sr-backdrop"></div>
+  <div class="special-reveal-box" id="special-reveal-box">
+    <div class="sr-icon"  id="sr-icon"></div>
+    <div class="sr-label" id="sr-label"></div>
+    <div class="sr-horse" id="sr-horse"></div>
+    <div class="sr-odds"  id="sr-odds"></div>
+    <div class="sr-sub"   id="sr-sub"></div>
+    <div class="sr-hint">點擊任意處繼續</div>
+  </div>
+</div>
 
 <!-- 結算 Dialog（fixed overlay，蓋在最上層）-->
 <div id="settle-overlay" class="settle-overlay">

@@ -626,16 +626,7 @@
     }
     @keyframes ro-scroll { from{transform:translateX(0)} to{transform:translateX(-1500px)} }
 
-    /* ── 終點線 ── */
-    #finish-line {
-      position:absolute; right:8%; top:45%; bottom:0; width:4px;
-      background:repeating-linear-gradient(180deg,#fff 0,#fff 8px,#000 8px,#000 16px);
-      z-index:10;
-    }
-    #finish-flag {
-      position:absolute; right:calc(8% - 8px); top:42%;
-      font-size:clamp(14px,2vw,22px); z-index:11;
-    }
+    /* ── 終點線（舊 DOM 版已移除，改由 Canvas 繪製） ── */
 
     /* ── 馬匹（在 #ro-track 內） ── */
     .ro-horse-wrap {
@@ -1305,9 +1296,6 @@
         <div id="ro-rank-bar">
           <div class="rb-title">即時<br>排名</div>
         </div>
-        <!-- 終點線 -->
-        <div id="finish-line"></div>
-        <div id="finish-flag">🏁</div>
         <!-- Canvas U-track（馬匹與賽道由 drawRaceFrame() 繪製） -->
         <canvas id="race-canvas"></canvas>
       </div>
@@ -2764,10 +2752,10 @@ function buildSpeedProfiles(script, order) {
 function getTrackGeom() {
   const W = raceCanvasEl.offsetWidth, H = raceCanvasEl.offsetHeight;
   const leftX = W * 0.06;
-  const bendX = W * 0.88;
+  const bendX = W * 0.87;
   const midY  = H * 0.50;
-  const topY  = H * 0.10;                   // 最外道（lane 0）在上直道的 y
-  const laneH = (H * 0.35) / 6;             // 7 道 6 間距，跨幅 = 35% H
+  const topY  = H * 0.08;                   // 最外道（lane 0）在上直道的 y
+  const laneH = (H * 0.28) / 6;             // 7 道 6 間距，跨幅 = 28% H（讓內側半徑夠大）
   const R3    = midY - topY - 3 * laneH;    // 中間道（laneIdx=3）半徑
   const L_top = bendX - leftX;
   const L_semi = Math.PI * R3;
@@ -2794,96 +2782,98 @@ function getHorsePos(progress, laneIdx, g) {
 
 function drawTrack(ctx, g) {
   const { W, H, leftX, bendX, midY, topY, laneH } = g;
-  const margin = laneH * 0.4;
+  const margin = laneH * 0.5;
   const outerR = midY - topY + margin;
-  const innerR = Math.max(midY - topY - 6 * laneH - margin, laneH * 0.3);
-  const midR   = (outerR + innerR) / 2;
-  const bandW  = outerR - innerR;
+  const innerR = Math.max(midY - topY - 6 * laneH - margin, laneH * 0.8);
 
-  // 背景
+  // 1. 背景
   ctx.fillStyle = '#071320';
   ctx.fillRect(0, 0, W, H);
 
-  // 跑道面（上直、下直、右彎弧帶）
+  // 2. 跑道面：一次性路徑（外環順時針 + 內環逆時針 = 環形填充）
   ctx.fillStyle = '#7a5228';
-  ctx.fillRect(leftX, midY - outerR, bendX - leftX, bandW);
-  ctx.fillRect(leftX, midY + innerR, bendX - leftX, bandW);
-  ctx.save();
-  ctx.lineWidth = bandW + 1;
-  ctx.strokeStyle = '#7a5228';
   ctx.beginPath();
-  ctx.arc(bendX, midY, midR, -Math.PI / 2, Math.PI / 2);
-  ctx.stroke();
-  ctx.restore();
+  // 外邊界（順時針）
+  ctx.moveTo(leftX, midY - outerR);
+  ctx.lineTo(bendX, midY - outerR);
+  ctx.arc(bendX, midY, outerR, -Math.PI / 2, Math.PI / 2);
+  ctx.lineTo(leftX, midY + outerR);
+  // 內邊界（逆時針，切出內場孔洞）
+  ctx.lineTo(leftX, midY + innerR);
+  ctx.arc(bendX, midY, innerR, Math.PI / 2, -Math.PI / 2, true);
+  ctx.lineTo(leftX, midY - innerR);
+  ctx.closePath();
+  ctx.fill();
 
-  // 內側草地（直道矩形 + 右彎 D 形填充）
+  // 3. 內場草地
   ctx.fillStyle = '#0d3020';
   ctx.fillRect(leftX, midY - innerR, bendX - leftX, innerR * 2);
-  ctx.save();
-  ctx.fillStyle = '#0d3020';
   ctx.beginPath();
   ctx.moveTo(bendX, midY - innerR);
   ctx.arc(bendX, midY, innerR, -Math.PI / 2, Math.PI / 2);
   ctx.closePath();
   ctx.fill();
-  ctx.restore();
 
-  // 內場文字
+  // 4. 內場文字
   ctx.save();
-  ctx.font = `bold ${Math.round(laneH * 1.0)}px sans-serif`;
-  ctx.fillStyle = 'rgba(255,215,0,0.20)';
+  ctx.font = `bold ${Math.round(laneH * 0.9)}px sans-serif`;
+  ctx.fillStyle = 'rgba(255,215,0,0.18)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('急速馬王', (leftX + bendX) / 2, midY);
   ctx.restore();
 
-  // 道次分隔線（虛線）
+  // 5. 道次分隔線（直道虛線 + 彎道弧線）
   ctx.save();
-  ctx.setLineDash([5, 9]);
-  ctx.lineWidth = 0.8;
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.setLineDash([4, 8]);
+  ctx.lineWidth = 0.7;
+  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
   for (let i = 1; i < 7; i++) {
+    const ri = midY - topY - i * laneH;
     const ty = topY + i * laneH;
-    const by = 2 * midY - ty;
+    const by = midY + ri;           // 下直道對應 y（鏡像）
+    // 直道段
     ctx.beginPath(); ctx.moveTo(leftX, ty); ctx.lineTo(bendX, ty); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(leftX, by); ctx.lineTo(bendX, by); ctx.stroke();
+    // 彎道段（弧線）
+    ctx.beginPath(); ctx.arc(bendX, midY, ri, -Math.PI / 2, Math.PI / 2); ctx.stroke();
   }
-  // 外緣實線
+  // 外緣邊界線
   ctx.setLineDash([]);
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
   ctx.beginPath(); ctx.moveTo(leftX, midY - outerR); ctx.lineTo(bendX, midY - outerR); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(leftX, midY + outerR); ctx.lineTo(bendX, midY + outerR); ctx.stroke();
   ctx.beginPath(); ctx.arc(bendX, midY, outerR, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+  // 內場邊界線
   ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.beginPath(); ctx.moveTo(leftX, midY - innerR); ctx.lineTo(bendX, midY - innerR); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(leftX, midY + innerR); ctx.lineTo(bendX, midY + innerR); ctx.stroke();
   ctx.beginPath(); ctx.arc(bendX, midY, innerR, -Math.PI / 2, Math.PI / 2); ctx.stroke();
   ctx.restore();
 
-  // 終點線（下直道左端）
+  // 6. 終點線（下直道左端，棋盤格）
   const fsTop = midY + innerR;
   const fsBot = midY + outerR;
-  const stripes = 8;
-  const sh = (fsBot - fsTop) / stripes;
-  for (let s = 0; s < stripes; s++) {
+  const sh    = (fsBot - fsTop) / 8;
+  for (let s = 0; s < 8; s++) {
     ctx.fillStyle = s % 2 === 0 ? '#ffffff' : '#000000';
     ctx.fillRect(leftX - 4, fsTop + s * sh, 8, sh);
   }
   ctx.save();
-  ctx.font = `bold ${Math.round(laneH * 0.65)}px sans-serif`;
+  ctx.font = `bold ${Math.round(laneH * 0.6)}px sans-serif`;
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.save();
-  ctx.translate(leftX - 12, (fsTop + fsBot) / 2);
+  ctx.translate(leftX - 11, (fsTop + fsBot) / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillText('FINISH', 0, 0);
   ctx.restore();
-  ctx.restore();
 
-  // 起跑標記（上直道左端）
+  // 7. 起跑線（上直道左端）
   const stTop = midY - outerR;
   const stBot = midY - innerR;
-  ctx.fillStyle = 'rgba(46,204,113,0.75)';
+  ctx.fillStyle = 'rgba(46,204,113,0.80)';
   ctx.fillRect(leftX - 3, stTop, 6, stBot - stTop);
 }
 
@@ -3037,6 +3027,7 @@ function startRace() {
   raceCanvasEl  = document.getElementById('race-canvas');
   raceCtx       = raceCanvasEl.getContext('2d');
   raceCanvasEl.style.display = 'block';
+  drawRaceFrame(performance.now());   // 倒數期間先顯示空跑道
 
   buildRankBar();
 

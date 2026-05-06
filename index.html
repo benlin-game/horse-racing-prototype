@@ -2750,13 +2750,17 @@ function buildSpeedProfiles(script, order) {
 // ════════════════════════════════════
 function getTrackGeom() {
   const W = raceCanvasEl.offsetWidth, H = raceCanvasEl.offsetHeight;
-  const leftX = W * 0.06;
-  const bendX = W * 0.87;
-  const midY  = H * 0.50;
-  const topY  = H * 0.05;                   // 最外道（lane 0）在上直道的 y
-  const laneH = (H * 0.30) / 6;             // 7 道 6 間距，跨幅 = 30% H
-  const R3    = midY - topY - 3 * laneH;    // 中間道（laneIdx=3）半徑
-  const L_top = bendX - leftX;
+  if (!W || !H) return null;
+  const leftX  = W * 0.05;
+  const midY   = H * 0.50;
+  const topY   = H * 0.08;                      // lane 0 y（上直道最外道）
+  const laneH  = (H * 0.24) / 6;               // 6 間距，總跨幅 24% H
+  const margin = laneH * 0.5;
+  const outerR = midY - topY + margin;           // 外側半徑
+  // bendX 動態計算：確保弧形不超出右邊界（留 3% 右邊距）
+  const bendX  = W * 0.97 - outerR;
+  const R3     = midY - topY - 3 * laneH;       // 中間道半徑（用於弧長計算）
+  const L_top  = bendX - leftX;
   const L_semi = Math.PI * R3;
   const L_bot  = L_top;
   return { W, H, leftX, bendX, midY, topY, laneH,
@@ -2878,7 +2882,7 @@ function drawTrack(ctx, g) {
 
 function drawHorses(ctx, geom, frameIdx, ts) {
   const SW = 52, SH = 52;
-  const drawSz = Math.round(geom.laneH * 1.7);   // canvas 繪製尺寸（縮放後）
+  const drawSz = Math.min(Math.round(geom.laneH * 2.4), 44);  // 精靈尺寸，上限 44px
   const half   = drawSz / 2;
 
   horsesByIdx.forEach((h, laneIdx) => {
@@ -2945,10 +2949,12 @@ function drawHorses(ctx, geom, frameIdx, ts) {
 function drawRaceFrame(ts) {
   if (!raceCtx || !raceCanvasEl) return;
   const W = raceCanvasEl.offsetWidth, H = raceCanvasEl.offsetHeight;
+  if (!W || !H) return;
   if (raceCanvasEl.width !== W || raceCanvasEl.height !== H) {
     raceCanvasEl.width = W; raceCanvasEl.height = H;
   }
   const geom = getTrackGeom();
+  if (!geom) return;
   drawTrack(raceCtx, geom);
   drawHorses(raceCtx, geom, Math.floor(ts / 80) % 6, ts);
 }

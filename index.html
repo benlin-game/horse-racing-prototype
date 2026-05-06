@@ -1610,10 +1610,10 @@ function showSkillBubble(horse, skill) {
   // 定位：用 canvas 座標換算
   const progress = Math.max(0, Math.min(1,
     (racePositions[horse.pos] - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT)));
-  const laneIdx = horsesByIdx.findIndex(h => h.pos === horse.pos);
-  if (laneIdx < 0) return;
+  const laneY = horseLaneY[horse.pos] ?? 3;
   const g  = getTrackGeom();
-  const hp = getHorsePos(progress, laneIdx, g);
+  if (!g) return;
+  const hp = getHorsePos(progress, laneY, g);
   const bx = hp.x + 18;
   const by = hp.y - 42;
 
@@ -2537,9 +2537,12 @@ let raceCanvasEl   = null;
 let raceCtx        = null;
 const horseSprite  = new Image();
 horseSprite.src    = 'gen_tools/銀翼馬/horse_1x6.png';
-let horsesByIdx    = [];   // [...S.horses].sort(pos) — laneIdx 對應
+let horsesByIdx    = [];   // 用於 showSkillBubble 等需要馬匹列表的地方
 let canvasDone     = {};   // h.pos → bool（過終點後停止繪製）
 const horseFlashes = {};   // h.pos → { until:ms, color:str }（技能閃光）
+let horseLaneY     = {};   // h.pos → 當前橫向道次位置（連續 0.0~6.0）
+let horseLaneTgt   = {};   // h.pos → 目標道次位置
+let horseLaneTimer = {};   // h.pos → 距下次換目標的剩餘 ms
 
 const ADS_DATA = [
   { text:'GRAND PRIX',    bg:'rgba(160,18,18,.78)',   w:138 },
@@ -2885,12 +2888,13 @@ function drawHorses(ctx, geom, frameIdx, ts) {
   const drawSz = Math.min(Math.round(geom.laneH * 2.4), 44);  // 精靈尺寸，上限 44px
   const half   = drawSz / 2;
 
-  horsesByIdx.forEach((h, laneIdx) => {
+  S.horses.forEach(h => {
     if (canvasDone[h.pos]) return;
     const rawProg = racePositions[h.pos];
     if (rawProg === undefined) return;
+    const laneY   = horseLaneY[h.pos] ?? 3;
     const progress = (rawProg - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT);
-    const { x, y, angle } = getHorsePos(Math.min(progress, 1.0), laneIdx, geom);
+    const { x, y, angle } = getHorsePos(Math.min(progress, 1.0), laneY, geom);
     const sx = (frameIdx % 6) * SW;
 
     const isSpec1 = S.specialHorse  && h.pos === S.specialHorse.pos;
@@ -3028,7 +3032,12 @@ function startRace() {
   horsesByIdx   = [...S.horses].sort(() => Math.random() - 0.5);
   horsesByIdx.forEach(h => { racePositions[h.pos] = RACE_START_PCT; });
   canvasDone    = {};
-  S.horses.forEach(h => { canvasDone[h.pos] = false; });
+  S.horses.forEach(h => {
+    canvasDone[h.pos]     = false;
+    horseLaneY[h.pos]     = 0.5 + Math.random() * 5.0;  // 開賽時隨機分佈在跑道中段
+    horseLaneTgt[h.pos]   = 0.5 + Math.random() * 5.0;
+    horseLaneTimer[h.pos] = Math.random() * 1200;
+  });
   raceCanvasEl  = document.getElementById('race-canvas');
   raceCtx       = raceCanvasEl.getContext('2d');
   raceCanvasEl.style.display = 'block';
@@ -3092,6 +3101,20 @@ function startRace() {
         } else {
           anyRunning = true;
         }
+      });
+
+      // ── 橫向漂移：每匹馬緩慢游移至隨機目標道次 ──
+      const LANE_SPD = 0.0018; // lane 單位/ms（約 2-3 秒橫跨全道）
+      S.horses.forEach(h => {
+        if (done[h.pos]) return;
+        horseLaneTimer[h.pos] -= dt;
+        if (horseLaneTimer[h.pos] <= 0) {
+          horseLaneTgt[h.pos]   = 0.3 + Math.random() * 5.4;
+          horseLaneTimer[h.pos] = 1200 + Math.random() * 2000;
+        }
+        const diff = horseLaneTgt[h.pos] - horseLaneY[h.pos];
+        horseLaneY[h.pos] += Math.sign(diff) * Math.min(Math.abs(diff), LANE_SPD * dt);
+        horseLaneY[h.pos]  = Math.max(0.1, Math.min(5.9, horseLaneY[h.pos]));
       });
 
       drawRaceFrame(ts);

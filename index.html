@@ -55,20 +55,34 @@
 
     /* ── HEADER ── */
     #header {
-      display:flex; align-items:center; gap:1%;
+      display:flex; align-items:center;
       padding:0 1.2%;
       background:var(--bg-surface);
       border-bottom:1px solid var(--border);
       z-index:10;
     }
-    .hd-race { font-size:clamp(8px,1.5vw,18px); font-weight:700; color:var(--accent-gold); font-family:var(--fn-mono); letter-spacing:.06em; }
-    .hd-info { font-size:clamp(6px,1.0vw,12px); color:var(--text-sub); font-family:var(--fn-mono); }
-    .hd-div  { width:1px; height:60%; background:var(--border); margin:0 .4%; }
     .hd-spc  { flex:1; }
+    .hd-icon-btn {
+      display:flex; align-items:center; justify-content:center;
+      height:clamp(18px,3.5vh,30px); padding:0 clamp(6px,1vw,14px);
+      border-radius:4px; border:1px solid var(--border);
+      background:transparent; color:var(--text-sub);
+      font-size:clamp(7px,1.0vw,13px); cursor:pointer; transition:all .15s; flex-shrink:0;
+    }
+    .hd-icon-btn:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
+    .hd-icon-btn.open  { border-color:rgba(201,162,39,.6); color:var(--accent-gold); background:rgba(201,162,39,.12); }
     #cd-wrap { display:flex; align-items:center; gap:.4em; }
-    #bal-wrap { display:flex; align-items:center; gap:.4em; }
-    #bal-label { font-size:clamp(6px,0.9vw,11px); color:var(--text-sub); }
-    #bal-val { font-family:var(--fn-mono); font-size:clamp(9px,1.4vw,17px); font-weight:700; color:var(--color-win); }
+    #bal-wrap { display:flex; align-items:center; justify-content:center; gap:.4em; }
+    #bal-coin { font-size:clamp(14px,2.2vw,26px); line-height:1; }
+    #bal-val  { font-family:var(--fn-mono); font-size:clamp(12px,2.0vw,26px); font-weight:800; color:var(--color-win); letter-spacing:.04em; }
+    #bal-cheat {
+      margin-left:.3em; padding:0 .4em; height:clamp(14px,2.5vh,22px);
+      border-radius:3px; border:1px solid rgba(46,204,113,.4);
+      background:rgba(46,204,113,.12); color:#2ecc71;
+      font-size:clamp(6px,.8vw,10px); font-weight:700;
+      cursor:pointer; transition:all .15s; flex-shrink:0;
+    }
+    #bal-cheat:hover { background:rgba(46,204,113,.25); }
 
     /* ── MAIN AREA ── */
     #main-area { display:flex; overflow:hidden; position:relative; }
@@ -87,7 +101,8 @@
 
     /* 各列高度 */
     #tl-imgs-row          { flex:0 0 clamp(72px,22%,120px); }
-    #tl-names-row         { flex:0 0 clamp(18px,5.5%,28px); border-bottom:2px solid var(--border); }
+    #tl-names-row         { flex:0 0 clamp(16px,4.5%,24px); }
+    #tl-history-row       { flex:0 0 clamp(16px,4.5%,24px); border-bottom:2px solid var(--border); }
     #tl-win-row           { flex:1; min-height:clamp(26px,6%,42px); }
     #tl-place-row         { flex:1; min-height:clamp(26px,6%,42px); border-bottom:2px solid var(--border); }
     #tl-quinella-section  { flex:3; display:flex; overflow:hidden; border-bottom:none; }
@@ -117,7 +132,7 @@
 
     .tl-num-badge {
       width:clamp(14px,2vw,22px); height:clamp(14px,2vw,22px);
-      border-radius:50%; border:2px solid currentColor;
+      border-radius:4px; border:2px solid currentColor;
       display:flex; align-items:center; justify-content:center;
       font-size:clamp(6px,.88vw,11px); font-weight:700; font-family:var(--fn-mono);
       flex-shrink:0;
@@ -129,6 +144,21 @@
     .tl-golden-crown {
       display:none;
     }
+
+    /* 近5場歷史格 */
+    .tl-hist-cell {
+      flex:1; display:flex; align-items:center; justify-content:center; gap:2px;
+      border-right:1px solid var(--border); padding:0 2px; min-width:0; overflow:hidden;
+    }
+    .tl-hist-cell:last-child { border-right:none; }
+    .tl-rank-badge {
+      font-size:clamp(5px,.65vw,9px); font-weight:700; font-family:var(--fn-mono);
+      min-width:clamp(9px,1.2vw,14px); text-align:center; border-radius:2px; padding:0 1px; line-height:1.6;
+    }
+    .tl-rank-badge.r1 { color:#ffd700; background:rgba(255,215,0,.12); }
+    .tl-rank-badge.r3 { color:#7ab8e0; background:rgba(122,184,224,.10); }
+    .tl-rank-badge.rx { color:var(--text-dim); }
+    .tl-rank-badge.ra { color:var(--text-dim); opacity:.4; }
 
     /* 馬名格 */
     .tl-name-cell {
@@ -151,6 +181,26 @@
     .tl-odds-cell.sel         { background:var(--sel-bg); outline:1.5px solid var(--border-sel); }
     .tl-odds-cell.golden      { background:var(--golden-bg); }
     .tl-odds-cell.golden.sel  { background:rgba(255,215,0,.22); outline:1.5px solid var(--gold-bright); }
+    .tl-odds-cell.black-sp    { background:rgba(80,60,180,.28); }
+    .tl-odds-cell.black-sp.sel{ background:rgba(100,80,220,.38); outline:1.5px solid #99aaff; }
+    /* 倍率標籤：右上 */
+    .sr-mult-tag {
+      position:absolute; top:3px; right:3px;
+      font-size:clamp(5px,.65vw,8px); font-weight:700;
+      background:rgba(0,0,0,.55); color:#ffd700;
+      border-radius:3px; padding:0 3px; line-height:1.5;
+      pointer-events:none;
+    }
+    .tl-odds-cell.black-sp .sr-mult-tag { color:#aac0ff; }
+    /* 結算期間：前三名 + 特殊馬標示（頭像格） */
+    .result-rank-badge {
+      position:absolute; top:2px; right:3px;
+      font-size:clamp(8px,1.15vw,14px); line-height:1;
+      pointer-events:none; z-index:3; user-select:none;
+    }
+    .tl-img-cell.result-rank-1 { box-shadow:inset 0 0 0 2.5px #ffd700; background:rgba(255,215,0,.07); }
+    .tl-img-cell.result-rank-2 { box-shadow:inset 0 0 0 2px #c0c0c0;  background:rgba(200,200,200,.05); }
+    .tl-img-cell.result-rank-3 { box-shadow:inset 0 0 0 2px #cd7f32;  background:rgba(180,120,60,.06); }
     /* 編號徽章：左上 */
     .tl-odds-cell .tl-num-badge {
       position:absolute; top:3px; left:3px;
@@ -242,9 +292,59 @@
       20%,60% { background:rgba(200,160,255,.18); outline:2px solid #cc88ff; box-shadow:0 0 14px rgba(200,160,255,.55); }
       40%,80% { background:rgba(200,160,255,.08); outline:1px solid rgba(200,160,255,.45); box-shadow:none; }
     }
-    .flash-special-golden { animation:flash-special-golden 1.5s ease-in-out forwards; }
-    .flash-special-black  { animation:flash-special-black  1.5s ease-in-out forwards; }
-    .flash-special-double { animation:flash-special-double 1.5s ease-in-out forwards; }
+    .flash-special-golden { animation:flash-special-golden 1.8s ease-in-out forwards; }
+    .flash-special-black  { animation:flash-special-black  1.8s ease-in-out forwards; }
+    .flash-special-double { animation:flash-special-double 1.8s ease-in-out forwards; }
+    /* 結算時賠率提升脈動：讓 .sr-mult-tag 跳大 */
+    @keyframes mult-boost-pulse {
+      0%   { transform:scale(1);    opacity:1; }
+      30%  { transform:scale(2.2);  opacity:1; color:#fff; }
+      55%  { transform:scale(1.6);  opacity:1; }
+      80%  { transform:scale(1.9);  opacity:1; }
+      100% { transform:scale(1);    opacity:1; }
+    }
+    .flash-special-golden .sr-mult-tag,
+    .flash-special-black  .sr-mult-tag {
+      animation: mult-boost-pulse 1.8s ease-in-out forwards;
+    }
+
+    /* ── 特殊馬中途現身 Banner ── */
+    #special-mid-banner {
+      position:fixed; top:22%; left:50%;
+      transform:translateX(-50%);
+      z-index:220;
+      display:flex; align-items:center; gap:clamp(6px,1vw,14px);
+      padding:clamp(8px,1.2vw,16px) clamp(16px,2.8vw,36px);
+      border-radius:14px;
+      font-weight:900; white-space:nowrap;
+      pointer-events:none; opacity:0;
+    }
+    #special-mid-banner.smb-active { animation:smb-appear 3.6s cubic-bezier(.17,.67,.35,1.3) forwards; }
+    #special-mid-banner.smb-golden {
+      background:linear-gradient(135deg,rgba(60,40,0,.94),rgba(90,65,0,.94));
+      border:2.5px solid #ffd700;
+      box-shadow:0 0 28px 8px rgba(255,215,0,.5),0 4px 16px rgba(0,0,0,.6);
+      color:#ffd700;
+    }
+    #special-mid-banner.smb-black {
+      background:linear-gradient(135deg,rgba(8,8,32,.96),rgba(18,14,52,.96));
+      border:2.5px solid #99aaff;
+      box-shadow:0 0 28px 8px rgba(120,140,255,.45),0 4px 16px rgba(0,0,0,.7);
+      color:#aac0ff;
+    }
+    .smb-icon { font-size:clamp(20px,3.2vw,40px); line-height:1; filter:drop-shadow(0 0 6px currentColor); }
+    .smb-text { font-size:clamp(15px,2.4vw,30px); letter-spacing:.06em; text-shadow:0 0 10px currentColor; }
+    .smb-sep  { opacity:.35; }
+    .smb-name { font-size:clamp(11px,1.7vw,22px); opacity:.88; }
+    .smb-mult { font-size:clamp(18px,2.8vw,36px); font-family:'Courier New',monospace; margin-left:4px;
+                text-shadow:0 0 12px currentColor; }
+    @keyframes smb-appear {
+      0%   { opacity:0; transform:translateX(-50%) translateY(-48px) scale(.75); }
+      13%  { opacity:1; transform:translateX(-50%) translateY(0)     scale(1.08); }
+      22%  { opacity:1; transform:translateX(-50%) translateY(0)     scale(1); }
+      78%  { opacity:1; transform:translateX(-50%) translateY(0)     scale(1); }
+      100% { opacity:0; transform:translateX(-50%) translateY(-24px) scale(.88); }
+    }
 
     /* ── 特殊馬揭曉 Overlay ── */
     #special-reveal-overlay {
@@ -941,21 +1041,6 @@
 
     /* ── BET BADGE (舊殘留已整合至 cell-tl，此段保留空白佔位）── */
 
-    /* ── 資訊面板按鈕（Header）── */
-    #btn-info-toggle {
-      display:flex; align-items:center; gap:.3em;
-      padding:0 clamp(5px,.9vw,12px);
-      height:clamp(16px,3.5vh,30px);
-      border-radius:4px; border:1px solid var(--border);
-      background:transparent; color:var(--text-sub);
-      font-size:clamp(6px,.9vw,11px); font-weight:600;
-      cursor:pointer; transition:all .15s; white-space:nowrap;
-    }
-    #btn-info-toggle:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
-    #btn-info-toggle.open  {
-      border-color:rgba(201,162,39,.6); color:var(--accent-gold);
-      background:rgba(201,162,39,.12);
-    }
 
     /* ── 資訊面板（可收合抽屜）── */
     #info-panel {
@@ -1031,6 +1116,12 @@
       color:var(--text-sub);
     }
     #bb-btn-repeat:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
+    #bb-btn-turbo {
+      background:rgba(255,255,255,.05); border-color:var(--border);
+      color:var(--text-sub);
+    }
+    #bb-btn-turbo:hover  { border-color:#f39c12; color:#f39c12; }
+    #bb-btn-turbo.active { border-color:#f39c12; color:#f39c12; background:rgba(243,156,18,.15); }
     #bb-btn-allbet {
       background:rgba(46,204,113,.12); border-color:#27ae60; color:#2ecc71;
     }
@@ -1047,17 +1138,6 @@
     #btn-start:hover    { background:var(--gold-bright); border-color:var(--gold-bright); }
     #btn-start:disabled { background:var(--border); border-color:var(--border); color:var(--text-dim); cursor:not-allowed; }
 
-    /* ── HISTORY BUTTON ── */
-    #btn-history {
-      display:flex; align-items:center; gap:.3em;
-      padding:0 clamp(5px,.9vw,12px);
-      height:clamp(16px,3.5vh,30px);
-      border-radius:4px; border:1px solid var(--border);
-      background:transparent; color:var(--text-sub);
-      font-size:clamp(6px,.9vw,11px); font-weight:600;
-      cursor:pointer; transition:all .15s; white-space:nowrap;
-    }
-    #btn-history:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
 
     /* ── HISTORY OVERLAY ── */
     #history-overlay {
@@ -1199,28 +1279,15 @@
 
     <!-- ══ HEADER ══ -->
     <div id="header">
-      <button id="btn-info-toggle" onclick="toggleInfoPanel()">📊 賽事資訊</button>
-      <div class="hd-div"></div>
-      <span class="hd-race" id="race-lbl">RACE 1</span>
-      <span class="hd-info" id="race-info">草地 · 1200m</span>
-      <span class="hd-info" id="machine-num-lbl" style="color:var(--accent-gold);opacity:.65;font-family:var(--fn-mono)">#--- 號賽道</span>
-      <div class="hd-div"></div>
+      <button id="btn-info-toggle" class="hd-icon-btn" onclick="toggleInfoPanel()">📊</button>
       <div class="hd-spc"></div>
-      <button id="btn-history" onclick="openHistory()">📋 歷史紀錄</button>
-      <div class="hd-div"></div>
       <div id="bal-wrap">
-        <span id="bal-label">籌碼</span>
+        <span id="bal-coin">🪙</span>
         <span id="bal-val">$10,000</span>
-        <button onclick="cheatMoney()" title="補充籌碼" style="
-          margin-left:.4em;
-          padding:0 .5em; height:clamp(14px,3vh,26px);
-          border-radius:3px; border:1px solid rgba(46,204,113,.4);
-          background:rgba(46,204,113,.12); color:#2ecc71;
-          font-size:clamp(7px,1.0vw,12px); font-weight:700;
-          cursor:pointer; transition:all .15s;
-        " onmouseover="this.style.background='rgba(46,204,113,.25)'"
-           onmouseout="this.style.background='rgba(46,204,113,.12)'">+$10K</button>
+        <button id="bal-cheat" onclick="cheatMoney()" title="補充籌碼">+$10K</button>
       </div>
+      <div class="hd-spc"></div>
+      <button id="btn-history" class="hd-icon-btn" onclick="openHistory()">📋</button>
     </div>
 
     <!-- ══ MAIN AREA ══ -->
@@ -1242,6 +1309,10 @@
         <!-- Row 2: 馬匹名字 -->
         <div id="tl-names-row" class="tl-row">
           <div class="tl-row-lbl"></div>
+        </div>
+        <!-- Row 2.5: 近5場排名 -->
+        <div id="tl-history-row" class="tl-row">
+          <div class="tl-row-lbl" style="font-size:clamp(5px,.7vw,9px);color:var(--text-sub)">戰績</div>
         </div>
         <!-- Row 3: 獨贏 -->
         <div id="tl-win-row" class="tl-row">
@@ -1271,6 +1342,7 @@
       <button id="bb-btn-repeat" class="bb-btn" onclick="repeatBet()">□ 重複下注</button>
       <button id="bb-btn-allbet" class="bb-btn" onclick="betAll()">一鍵全注</button>
       <button id="bb-btn-cancel" class="bb-btn" onclick="cancelAll()">取消</button>
+      <button id="bb-btn-turbo" class="bb-btn" onclick="toggleTurbo()">□ 加速</button>
       <button id="btn-start" class="bb-btn" onclick="beginRace()">開賽</button>
     </div>
 
@@ -1399,20 +1471,11 @@ const CFG = {
   RTP_WIN:         0.93,   // 獨贏 RTP 93%
   RTP_PLACE:       0.94,   // 位置 RTP 94%
   RTP_QUINELLA:    0.90,   // 連贏 RTP 90%
-  // 黃金馬 / 黑金馬（投注後揭曉，保證第一）
-  GOLDEN_HORSE_CHANCE: 0.06,   // 黃金馬觸發率 6%
-  BLACK_HORSE_CHANCE:  0.015,  // 黑金馬觸發率 1.5%
-  GOLDEN_HORSE_ODDS:   250,    // 黃金馬 獨贏固定賠率
-  GOLDEN_HORSE_PLACE:  100,    // 黃金馬 位置固定賠率
-  BLACK_HORSE_ODDS:    350,    // 黑金馬 獨贏固定賠率
-  BLACK_HORSE_PLACE:   150,    // 黑金馬 位置固定賠率
-  // 雙馬事件（黃金馬+黑金馬同時出現）
-  DOUBLE_HORSE_CHANCE:       0.005, // 0.5%
-  DOUBLE_HORSE_GOLDEN_ODDS:  80,    // 雙馬 黃金馬 獨贏賠率
-  DOUBLE_HORSE_GOLDEN_PLACE: 20,    // 雙馬 黃金馬 位置賠率
-  DOUBLE_HORSE_BLACK_ODDS:   120,   // 雙馬 黑金馬 獨贏賠率
-  DOUBLE_HORSE_BLACK_PLACE:  30,    // 雙馬 黑金馬 位置賠率
-  DOUBLE_HORSE_Q_ODDS:       500,   // 雙馬 連贏固定賠率
+  // 黃金馬 / 黑金馬（投注後揭曉，賠率倍率加成，名次隨機）
+  GOLDEN_HORSE_CHANCE:   0.06,        // 黃金馬觸發率 6%
+  BLACK_HORSE_CHANCE:    0.015,       // 黑金馬觸發率 1.5%
+  GOLDEN_MULTIPLIERS:    [2, 3, 4],   // 黃金馬隨機賠率倍數
+  BLACK_MULTIPLIERS:     [3, 5, 8],   // 黑金馬隨機賠率倍數
 };
 
 // ════════════════════════════════════
@@ -1522,7 +1585,6 @@ function initMachine() {
     saveMachineData();
   }
   machineNum = (strToSeed(machineId) % 1000) + 1;
-  document.getElementById('machine-num-lbl').textContent = '#' + machineNum + ' 號賽道';
 }
 
 // ════════════════════════════════════
@@ -1541,15 +1603,11 @@ const S = {
   lastBets:    [],          // 上場注單（重複下注用，存 {type, horseIds, amount, odds}）
   history:     [],          // max 50 entries: {raceNum, order, goldenPos, winnerWinOdds}
   raceScript:   null,        // 1–5，本場選中的劇本
-  specialHorse:    null,   // 第一匹特殊馬（單馬事件=唯一；雙馬事件=第一名）
+  specialHorse:    null,   // 特殊馬（黃金馬 or 黑金馬），名次隨機
   specialType:     null,   // 'GOLDEN' | 'BLACK' | null
-  specialHorse2:   null,   // 雙馬事件第二名特殊馬
-  specialType2:    null,
-  doubleEvent:     false,  // 是否為雙馬事件
-  doubleQOdds:     null,   // 雙馬事件連贏賠率
   forceGoldenHorse: false,
   forceBlackHorse:  false,
-  forceDoubleHorse: false,
+  turbo:            false,   // 加速模式（x2 速度）
 };
 
 // ════════════════════════════════════
@@ -1614,8 +1672,11 @@ function showSkillBubble(horse, skill) {
   const g  = getTrackGeom();
   if (!g) return;
   const hp = getHorsePos(progress, laneY, g);
-  const bx = hp.x + 18;
-  const by = hp.y - 42;
+  // world → screen（考慮鏡頭縮放）
+  const screenX = (hp.x - cam.x) * cam.zoom + g.W / 2;
+  const screenY = (hp.y - cam.y) * cam.zoom + g.H / 2;
+  const bx = screenX + 18;
+  const by = screenY - 42;
 
   const bubble = document.createElement('div');
   bubble.className  = 'skill-bubble' + (skill.big ? ' skill-bubble-big' : '');
@@ -1777,92 +1838,37 @@ function pickHorses() {
 
 // ── 特殊馬事件：投注確認後觸發 ──
 function checkAndApplySpecialHorse() {
-  S.specialHorse  = null; S.specialType  = null;
-  S.specialHorse2 = null; S.specialType2 = null;
-  S.doubleEvent   = false; S.doubleQOdds  = null;
+  S.specialHorse = null; S.specialType = null;
 
-  let type, minOdds, maxOdds;
-  if (S.forceDoubleHorse) {
-    return applyDoubleHorseEvent();
-  } else if (S.forceBlackHorse) {
-    type = 'BLACK';  minOdds = CFG.BLACK_HORSE_MIN;  maxOdds = CFG.BLACK_HORSE_MAX;
-  } else if (S.forceGoldenHorse) {
-    type = 'GOLDEN'; minOdds = CFG.GOLDEN_HORSE_MIN; maxOdds = CFG.GOLDEN_HORSE_MAX;
-  } else {
+  let type;
+  if (S.forceBlackHorse)       type = 'BLACK';
+  else if (S.forceGoldenHorse) type = 'GOLDEN';
+  else {
     const r = Math.random();
-    if (r < CFG.DOUBLE_HORSE_CHANCE) {
-      return applyDoubleHorseEvent();
-    } else if (r < CFG.DOUBLE_HORSE_CHANCE + CFG.BLACK_HORSE_CHANCE) {
-      type = 'BLACK';  minOdds = CFG.BLACK_HORSE_MIN;  maxOdds = CFG.BLACK_HORSE_MAX;
-    } else if (r < CFG.DOUBLE_HORSE_CHANCE + CFG.BLACK_HORSE_CHANCE + CFG.GOLDEN_HORSE_CHANCE) {
-      type = 'GOLDEN'; minOdds = CFG.GOLDEN_HORSE_MIN; maxOdds = CFG.GOLDEN_HORSE_MAX;
-    } else {
-      return false;
-    }
+    if      (r < CFG.BLACK_HORSE_CHANCE)                           type = 'BLACK';
+    else if (r < CFG.BLACK_HORSE_CHANCE + CFG.GOLDEN_HORSE_CHANCE) type = 'GOLDEN';
+    else return false;
   }
 
-  // 單馬事件：優先從低勝率馬中選
-  const pool   = S.horses.filter(h => h.trueProb <= 0.20);
-  const source = pool.length > 0 ? pool : S.horses;
-  const target = source[Math.floor(Math.random() * source.length)];
+  // 任意一匹馬都可成為特殊馬
+  const target = S.horses[Math.floor(Math.random() * S.horses.length)];
 
-  const winOdds   = type === 'GOLDEN' ? CFG.GOLDEN_HORSE_ODDS  : CFG.BLACK_HORSE_ODDS;
-  const placeOdds = type === 'GOLDEN' ? CFG.GOLDEN_HORSE_PLACE : CFG.BLACK_HORSE_PLACE;
-  target.specialOdds      = winOdds;
-  target.specialPlaceOdds = placeOdds;
+  // 隨機選倍數，乘上當前市場賠率
+  const mults = type === 'GOLDEN' ? CFG.GOLDEN_MULTIPLIERS : CFG.BLACK_MULTIPLIERS;
+  const mult  = mults[Math.floor(Math.random() * mults.length)];
+  target.specialOdds      = +(target.winOdds   * mult).toFixed(1);
+  target.specialPlaceOdds = +(target.placeOdds * mult).toFixed(1);
   target.specialType = type;
+  target.specialMult = mult;
 
+  // 升級已下注的對應格
   S.bets.forEach(bet => {
-    if (bet.type === 'WIN'   && bet.horses[0] === target.pos) { bet.odds = winOdds;   bet.isSpecial = true; }
-    if (bet.type === 'PLACE' && bet.horses[0] === target.pos) { bet.odds = placeOdds; bet.isSpecial = true; }
+    if (bet.type === 'WIN'   && bet.horses[0] === target.pos) { bet.odds = target.specialOdds;      bet.isSpecial = true; }
+    if (bet.type === 'PLACE' && bet.horses[0] === target.pos) { bet.odds = target.specialPlaceOdds; bet.isSpecial = true; }
   });
 
   S.specialHorse = target;
   S.specialType  = type;
-  return true;
-}
-
-function applyDoubleHorseEvent() {
-  // 選兩匹不同的低勝率馬
-  const pool    = S.horses.filter(h => h.trueProb <= 0.20);
-  const source  = pool.length >= 2 ? pool : S.horses;
-  const shuffled = [...source].sort(() => Math.random() - 0.5);
-  const horseA  = shuffled[0];
-  const horseB  = shuffled.find(h => h.pos !== horseA.pos) || S.horses.find(h => h.pos !== horseA.pos);
-
-  // 隨機決定名次：黃1黑2 或 黑1黃2
-  const goldenFirst = Math.random() < 0.5;
-  const goldenHorse = goldenFirst ? horseA : horseB;
-  const blackHorse  = goldenFirst ? horseB : horseA;
-
-  goldenHorse.specialOdds      = CFG.DOUBLE_HORSE_GOLDEN_ODDS;
-  goldenHorse.specialPlaceOdds = CFG.DOUBLE_HORSE_GOLDEN_PLACE;
-  goldenHorse.specialType = 'GOLDEN';
-  blackHorse.specialOdds       = CFG.DOUBLE_HORSE_BLACK_ODDS;
-  blackHorse.specialPlaceOdds  = CFG.DOUBLE_HORSE_BLACK_PLACE;
-  blackHorse.specialType  = 'BLACK';
-
-  const first  = goldenFirst ? goldenHorse : blackHorse;
-  const second = goldenFirst ? blackHorse  : goldenHorse;
-
-  // 升級 WIN / PLACE 下注 + 連贏那格
-  S.bets.forEach(bet => {
-    if (bet.type === 'WIN') {
-      if (bet.horses[0] === goldenHorse.pos) { bet.odds = CFG.DOUBLE_HORSE_GOLDEN_ODDS;  bet.isSpecial = true; }
-      if (bet.horses[0] === blackHorse.pos)  { bet.odds = CFG.DOUBLE_HORSE_BLACK_ODDS;   bet.isSpecial = true; }
-    } else if (bet.type === 'PLACE') {
-      if (bet.horses[0] === goldenHorse.pos) { bet.odds = CFG.DOUBLE_HORSE_GOLDEN_PLACE; bet.isSpecial = true; }
-      if (bet.horses[0] === blackHorse.pos)  { bet.odds = CFG.DOUBLE_HORSE_BLACK_PLACE;  bet.isSpecial = true; }
-    } else if (bet.type === 'QUINELLA') {
-      const s = new Set(bet.horses);
-      if (s.has(goldenHorse.pos) && s.has(blackHorse.pos)) { bet.odds = CFG.DOUBLE_HORSE_Q_ODDS; bet.isSpecial = true; }
-    }
-  });
-
-  S.specialHorse  = first;   S.specialType  = first.specialType;
-  S.specialHorse2 = second;  S.specialType2 = second.specialType;
-  S.doubleEvent   = true;
-  S.doubleQOdds   = CFG.DOUBLE_HORSE_Q_ODDS;
   return true;
 }
 
@@ -1871,50 +1877,18 @@ function showSpecialReveal(callback) {
   const box      = document.getElementById('special-reveal-box');
   const backdrop = document.getElementById('sr-backdrop');
 
-  if (S.doubleEvent) {
-    // ── 雙馬事件 ──
-    const goldenFirst = S.specialType === 'GOLDEN';
-    const golden = goldenFirst ? S.specialHorse : S.specialHorse2;
-    const black  = goldenFirst ? S.specialHorse2 : S.specialHorse;
-    const orderLabel = goldenFirst ? '黃金馬第1・黑金馬第2' : '黑金馬第1・黃金馬第2';
-
-    backdrop.className = 'sr-backdrop sr-backdrop-black';
-    box.className = 'special-reveal-box double-horse-box';
-    box.innerHTML = `
-      <div class="sr-icon">🌟</div>
-      <div class="sr-label" style="color:#e0c0ff;font-size:clamp(11px,1.8vw,20px);">【雙馬降臨！】</div>
-      <div class="sr-double-row">
-        <div class="sr-double-card golden">
-          <div class="dc-label">★ 黃金馬</div>
-          <div class="dc-horse">${golden.pos}號 ${golden.name}</div>
-          <div class="dc-odds">${CFG.DOUBLE_HORSE_GOLDEN_ODDS}x</div>
-          <div style="font-size:clamp(6px,.8vw,10px);opacity:.7;margin-top:3%;">位置 ${CFG.DOUBLE_HORSE_GOLDEN_PLACE}x</div>
-        </div>
-        <div class="sr-double-card black">
-          <div class="dc-label">♚ 黑金馬</div>
-          <div class="dc-horse">${black.pos}號 ${black.name}</div>
-          <div class="dc-odds">${CFG.DOUBLE_HORSE_BLACK_ODDS}x</div>
-          <div style="font-size:clamp(6px,.8vw,10px);opacity:.7;margin-top:3%;">位置 ${CFG.DOUBLE_HORSE_BLACK_PLACE}x</div>
-        </div>
-      </div>
-      <div class="sr-q-highlight">連贏特別賠率</div>
-      <div class="sr-q-odds">${S.doubleQOdds}x</div>
-      <div class="sr-sub">${orderLabel}・保證包辦前兩名！</div>
-      <div class="sr-hint">點擊任意處繼續</div>`;
-  } else {
-    // ── 單馬事件 ──
-    const isBlack = S.specialType === 'BLACK';
-    backdrop.className = 'sr-backdrop ' + (isBlack ? 'sr-backdrop-black' : 'sr-backdrop-golden');
-    box.className = 'special-reveal-box ' + (isBlack ? 'black-horse-box' : 'golden-horse-box');
-    box.innerHTML = `
-      <div class="sr-icon">${isBlack ? '🖤' : '✨'}</div>
-      <div class="sr-label">${isBlack ? '【黑金馬】降臨！' : '【黃金馬】出現！'}</div>
-      <div class="sr-horse">${S.specialHorse.pos}號 ${S.specialHorse.name}</div>
-      <div class="sr-odds">${S.specialHorse.specialOdds}x</div>
-      <div class="sr-sub">獨贏 ${S.specialHorse.specialOdds}x・位置 ${S.specialHorse.specialPlaceOdds}x</div>
-      <div class="sr-sub">${isBlack ? '黑金馬' : '黃金馬'}保證奪得第一名！</div>
-      <div class="sr-hint">點擊任意處繼續</div>`;
-  }
+  const isBlack = S.specialType === 'BLACK';
+  backdrop.className = 'sr-backdrop ' + (isBlack ? 'sr-backdrop-black' : 'sr-backdrop-golden');
+  box.className = 'special-reveal-box ' + (isBlack ? 'black-horse-box' : 'golden-horse-box');
+  const multColor = isBlack ? '#aaaaff' : '#ffd700';
+  box.innerHTML = `
+    <div class="sr-icon">${isBlack ? '🖤' : '✨'}</div>
+    <div class="sr-label">${isBlack ? '【黑金馬】降臨！' : '【黃金馬】出現！'}</div>
+    <div class="sr-horse">${S.specialHorse.pos}號 ${S.specialHorse.name}</div>
+    <div class="sr-odds" style="color:${multColor}">${S.specialHorse.specialMult}x 賠率加成！</div>
+    <div class="sr-sub">獨贏 <b style="color:${multColor}">${S.specialHorse.specialOdds}x</b>　位置 <b style="color:${multColor}">${S.specialHorse.specialPlaceOdds}x</b></div>
+    <div class="sr-sub" style="opacity:.6;font-size:.85em;">名次隨緣・賠率加倍！</div>
+    <div class="sr-hint">點擊任意處繼續</div>`;
 
   overlay.classList.add('active');
 
@@ -2010,6 +1984,7 @@ function renderToteBoard() {
   sorted.forEach(h => {
     const cell = document.createElement('div');
     cell.className = 'tl-img-cell';
+    cell.dataset.pos = h.pos;
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
       <img class="tl-portrait" src="./馬頭像/${h.name}.png"
@@ -2028,18 +2003,38 @@ function renderToteBoard() {
     namesRow.appendChild(cell);
   });
 
+  // ── Row 2.5: 近5場排名 ──
+  const histRow = clearRow('tl-history-row');
+  sorted.forEach(h => {
+    const cell = document.createElement('div');
+    cell.className = 'tl-hist-cell';
+    // 只取「此馬有參賽」的最近5場，由舊到新（左=舊，右=新）
+    const participated = S.history.filter(e => e.order.some(o => o.id === h.id));
+    const recent = participated.slice(0, 5).reverse();
+    const badges = recent.map(entry => {
+      const r = entry.order.findIndex(o => o.id === h.id) + 1;
+      const cls = r === 1 ? 'r1' : r <= 3 ? 'r3' : 'rx';
+      return `<span class="tl-rank-badge ${cls}">${r}</span>`;
+    });
+    cell.innerHTML = badges.join('');
+    histRow.appendChild(cell);
+  });
+
   // ── Row 3: 獨贏 ──
   const winRow = clearRow('tl-win-row');
   sorted.forEach(h => {
-    const wBet = cellBetTotal('WIN', [h.pos]);
-    const wCls = oddsClass(h.winOdds);
+    const wBet    = cellBetTotal('WIN', [h.pos]);
+    const isSpec  = !!h.specialType;
+    const specCls = isSpec ? (h.specialType === 'GOLDEN' ? ' golden' : ' black-sp') : '';
+    const wOdds   = isSpec ? h.specialOdds : h.winOdds;
     const cell = document.createElement('div');
-    cell.className = `tl-odds-cell${wBet>0?' sel':''}`;
+    cell.className = `tl-odds-cell${wBet>0?' sel':''}${specCls}`;
     cell.dataset.type = 'WIN'; cell.dataset.pos = h.pos;
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
       ${wBet > 0 ? `<span class="bet-badge">$${wBet}</span>` : ''}
-      <span class="hr-odds">${h.winOdds}<span class="hr-odds-unit">x</span></span>`;
+      ${isSpec ? `<span class="sr-mult-tag">${h.specialMult}x</span>` : ''}
+      <span class="hr-odds${isSpec?' golden':''}">${wOdds}<span class="hr-odds-unit">x</span></span>`;
     if (betting) cell.addEventListener('click', () => placeBet('WIN', h.pos));
     winRow.appendChild(cell);
   });
@@ -2047,15 +2042,18 @@ function renderToteBoard() {
   // ── Row 4: 位置 ──
   const placeRow = clearRow('tl-place-row');
   sorted.forEach(h => {
-    const pBet = cellBetTotal('PLACE', [h.pos]);
-    const pCls = oddsClass(h.placeOdds);
+    const pBet    = cellBetTotal('PLACE', [h.pos]);
+    const isSpec  = !!h.specialType;
+    const specCls = isSpec ? (h.specialType === 'GOLDEN' ? ' golden' : ' black-sp') : '';
+    const pOdds   = isSpec ? h.specialPlaceOdds : h.placeOdds;
     const cell = document.createElement('div');
-    cell.className = `tl-odds-cell${pBet>0?' sel':''}`;
+    cell.className = `tl-odds-cell${pBet>0?' sel':''}${specCls}`;
     cell.dataset.type = 'PLACE'; cell.dataset.pos = h.pos;
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
       ${pBet > 0 ? `<span class="bet-badge">$${pBet}</span>` : ''}
-      <span class="hr-odds">${h.placeOdds}<span class="hr-odds-unit">x</span></span>`;
+      ${isSpec ? `<span class="sr-mult-tag">${h.specialMult}x</span>` : ''}
+      <span class="hr-odds${isSpec?' golden':''}">${pOdds}<span class="hr-odds-unit">x</span></span>`;
     if (betting) cell.addEventListener('click', () => placeBet('PLACE', h.pos));
     placeRow.appendChild(cell);
   });
@@ -2421,6 +2419,14 @@ function flashInsufficient() {
   setTimeout(() => { el.style.color = orig; renderPanelFooter(); }, 1200);
 }
 
+function toggleTurbo() {
+  S.turbo = !S.turbo;
+  const btn = document.getElementById('bb-btn-turbo');
+  if (!btn) return;
+  btn.textContent = (S.turbo ? '☑' : '□') + ' 加速';
+  btn.classList.toggle('active', S.turbo);
+}
+
 function repeatBet() {
   if (S.phase !== 'BETTING' || S.lastBets.length === 0) return;
   // 用 horse.id 對應當前賽局的 pos
@@ -2501,12 +2507,8 @@ function cancelAll() {
 // ════════════════════════════════════
 function beginRace() {
   if (S.phase !== 'BETTING') return;
-  const triggered = checkAndApplySpecialHorse();
-  if (triggered) {
-    showSpecialReveal(() => startRace());
-  } else {
-    startRace();
-  }
+  checkAndApplySpecialHorse();   // 設定特殊馬（若有），中途才揭曉
+  startRace();
 }
 
 function skipRace() {
@@ -2529,6 +2531,7 @@ let raceAnimId    = null;
 let racePositions = {};   // h.pos → current progress value (RACE_START_PCT → OFFSCREEN_PCT)
 let rbItemsByPos  = {};   // h.pos → { el, posEl, arrowEl }
 let camTimer      = null;
+let cam           = { x: 0, y: 0, zoom: 1 };   // 鏡頭狀態（world 座標 + 縮放）
 let prevRanksByPos= {};   // h.pos → last rank
 let lastArrowTs   = 0;
 
@@ -2543,6 +2546,7 @@ const horseFlashes = {};   // h.pos → { until:ms, color:str }（技能閃光�
 let horseLaneY     = {};   // h.pos → 當前橫向道次位置（連續 0.0~6.0）
 let horseLaneTgt   = {};   // h.pos → 目標道次位置
 let horseLaneTimer = {};   // h.pos → 距下次換目標的剩餘 ms
+let specialParticles = []; // 特殊馬粒子效果陣列
 
 const ADS_DATA = [
   { text:'GRAND PRIX',    bg:'rgba(160,18,18,.78)',   w:138 },
@@ -2771,18 +2775,19 @@ function getTrackGeom() {
 }
 
 function getHorsePos(progress, laneIdx, g) {
-  const d  = Math.max(0, Math.min(1, progress)) * g.L_total;
-  const ri = g.midY - g.topY - laneIdx * g.laneH;   // 此道半徑
+  const d       = Math.max(0, Math.min(1, progress)) * g.L_total;
+  const ri      = g.midY - g.topY - laneIdx * g.laneH;   // 此道半徑
+  const laneArc = Math.PI * ri;                           // 此道真實弧長（各道不同）
   if (d <= g.L_top) {
     // 上直道：左→右
     return { x: g.leftX + d, y: g.topY + laneIdx * g.laneH, angle: 0 };
-  } else if (d <= g.L_top + g.L_semi) {
-    // 右彎
-    const theta = Math.PI * (d - g.L_top) / g.L_semi;
+  } else if (d <= g.L_top + laneArc) {
+    // 右彎：用各道自己的弧長計算 theta，速度在直道/弧道間一致
+    const theta = Math.PI * (d - g.L_top) / laneArc;
     return { x: g.bendX + ri * Math.sin(theta), y: g.midY - ri * Math.cos(theta), angle: theta };
   } else {
     // 下直道：右→左
-    return { x: g.bendX - (d - g.L_top - g.L_semi), y: g.midY + ri, angle: Math.PI };
+    return { x: g.bendX - (d - g.L_top - laneArc), y: g.midY + ri, angle: Math.PI };
   }
 }
 
@@ -2897,20 +2902,18 @@ function drawHorses(ctx, geom, frameIdx, ts) {
     const { x, y, angle } = getHorsePos(Math.min(progress, 1.0), laneY, geom);
     const sx = (frameIdx % 6) * SW;
 
-    const isSpec1 = S.specialHorse  && h.pos === S.specialHorse.pos;
-    const isSpec2 = S.specialHorse2 && h.pos === S.specialHorse2.pos;
+    const isSpec = S.specialHorse && h.pos === S.specialHorse.pos && S.specialRevealed;
 
     ctx.save();
     ctx.translate(x, y);
 
-    // 光暈
+    // 光暈（現身後才顯示特殊光效）
     const flash = horseFlashes[h.pos];
     if (flash && ts < flash.until) {
       ctx.shadowBlur = 18; ctx.shadowColor = flash.color;
-    } else if (isSpec1 || isSpec2) {
-      const gc = ((isSpec1 && S.specialType === 'GOLDEN') || (isSpec2 && S.specialType2 === 'GOLDEN'))
-        ? '#ffd700' : '#66aaff';
-      ctx.shadowBlur = 12; ctx.shadowColor = gc;
+    } else if (isSpec) {
+      const gc = S.specialType === 'GOLDEN' ? '#ffd700' : '#66aaff';
+      ctx.shadowBlur = 14; ctx.shadowColor = gc;
     } else {
       ctx.shadowBlur = 0;
     }
@@ -2928,13 +2931,14 @@ function drawHorses(ctx, geom, frameIdx, ts) {
     }
     ctx.restore();
 
-    // 號碼圓（馬匹上方或下方）
+    // 號碼方塊（馬匹上方或下方）
     const circR = Math.max(7, Math.round(geom.laneH * 0.50));
     const offY  = angle < Math.PI * 0.8 ? -(half + circR + 1) : (half + circR + 1);
     const cx = x, cy = y + offY;
+    const sq = circR * 2;
     ctx.save();
     ctx.beginPath();
-    ctx.arc(cx, cy, circR, 0, Math.PI * 2);
+    ctx.roundRect(cx - circR, cy - circR, sq, sq, Math.max(1, circR * 0.22));
     ctx.fillStyle   = h.color || '#888';
     ctx.globalAlpha = 0.92;
     ctx.fill();
@@ -2950,6 +2954,65 @@ function drawHorses(ctx, geom, frameIdx, ts) {
   });
 }
 
+function updateCamera(dt) {
+  const geom = getTrackGeom();
+  if (!geom) return;
+  const { W, H, leftX } = geom;
+
+  // 按進度排序（最前面優先）
+  const horses = S.horses.filter(h => racePositions[h.pos] !== undefined);
+  if (!horses.length) return;
+  horses.sort((a, b) => (racePositions[b.pos] || 0) - (racePositions[a.pos] || 0));
+
+  // 前 3 匹的世界座標中心
+  const top3 = horses.slice(0, Math.min(3, horses.length));
+  let sumX = 0, sumY = 0;
+  top3.forEach(h => {
+    const prog = Math.min(1, Math.max(0, (racePositions[h.pos] - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT)));
+    const { x, y } = getHorsePos(prog, horseLaneY[h.pos] ?? 3, geom);
+    sumX += x; sumY += y;
+  });
+  const followX = sumX / top3.length;
+  const followY = sumY / top3.length;
+
+  // 最前馬進度（0 = 起跑，1 = 終點）
+  const leadProg = Math.min(1, Math.max(0, (racePositions[horses[0].pos] - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT)));
+
+  let tx, ty, tz;
+
+  if (leadProg < 0.12) {
+    // ── Phase 1：開賽 zoom in（鏡頭對準起跑線群馬）──
+    tx = leftX + W * 0.13;
+    ty = H * 0.20;
+    tz = 1.9;
+  } else if (leadProg > 0.80) {
+    // ── Phase 3：衝線 zoom in（鏡頭往終點區推進）──
+    const t  = Math.min(1, (leadProg - 0.80) / 0.12);
+    const fx = leftX + W * 0.09;
+    const fy = H * 0.80;
+    tx = followX + (fx - followX) * t;
+    ty = followY + (fy - followY) * t;
+    tz = 1.4 + t * 0.55;   // 1.4 → 1.95
+  } else {
+    // ── Phase 2：跟隨領先群（中場跟跑）──
+    tx = followX;
+    ty = followY;
+    tz = 1.35;
+  }
+
+  // 邊界限制（不超出畫布）
+  const halfW = W / (2 * tz);
+  const halfH = H / (2 * tz);
+  tx = Math.max(halfW, Math.min(W - halfW, tx));
+  ty = Math.max(halfH, Math.min(H - halfH, ty));
+
+  // 指數平滑插值（frame-rate independent）
+  const alpha = 1 - Math.pow(0.92, dt / 16);
+  cam.x    += (tx - cam.x)    * alpha;
+  cam.y    += (ty - cam.y)    * alpha;
+  cam.zoom += (tz - cam.zoom) * alpha;
+}
+
 function drawRaceFrame(ts) {
   if (!raceCtx || !raceCanvasEl) return;
   const W = raceCanvasEl.offsetWidth, H = raceCanvasEl.offsetHeight;
@@ -2959,8 +3022,18 @@ function drawRaceFrame(ts) {
   }
   const geom = getTrackGeom();
   if (!geom) return;
+
+  // ── 套用鏡頭變換（world → screen）──
+  raceCtx.save();
+  raceCtx.translate(W / 2, H / 2);
+  raceCtx.scale(cam.zoom, cam.zoom);
+  raceCtx.translate(-cam.x, -cam.y);
+
   drawTrack(raceCtx, geom);
   drawHorses(raceCtx, geom, Math.floor(ts / 80) % 6, ts);
+  drawSpecialParticles(raceCtx);
+
+  raceCtx.restore();
 }
 
 // ════════════════════════════════════
@@ -2987,25 +3060,18 @@ function startRace() {
 
   // ── 預先模擬（結果已定，存入 S.raceOrder 供跳過使用）──
   const order = simulateRace(S.horses);
-  // 特殊馬：強制名次
-  if (S.doubleEvent && S.specialHorse2) {
-    // 雙馬：specialHorse=第一、specialHorse2=第二
-    const i1 = order.findIndex(h => h.pos === S.specialHorse.pos);
-    if (i1 > 0) { const [s] = order.splice(i1, 1); order.unshift(s); }
-    const i2 = order.findIndex(h => h.pos === S.specialHorse2.pos);
-    if (i2 > 1) { const [s] = order.splice(i2, 1); order.splice(1, 0, s); }
-    order.forEach((h, i) => h.finalPos = i + 1);
-  } else if (S.specialHorse) {
-    const idx = order.findIndex(h => h.pos === S.specialHorse.pos);
-    if (idx > 0) { const [sp] = order.splice(idx, 1); order.unshift(sp); }
-    order.forEach((h, i) => h.finalPos = i + 1);
-  }
+  order.forEach((h, i) => h.finalPos = i + 1);   // 特殊馬不強制名次，自然結果
   S.raceOrder = order;
   // 劇本系統：依賠率條件選劇本，建立速度配置
   const PHASE_SWITCH = 55;
   const PHASE_TRANS  = 6;
   const phase1Speeds = {};
   const phase2Speeds = {};
+
+  // 特殊馬：中途現身時間（進度 18-42%）
+  S.specialRevealed   = false;
+  S.specialRevealPct  = S.specialHorse ? (0.18 + Math.random() * 0.24) : 2;
+  specialParticles    = [];
 
   S.raceScript = selectRaceScript();
   const { p1: sp1, p2: sp2 } = buildSpeedProfiles(S.raceScript, order);
@@ -3018,13 +3084,6 @@ function startRace() {
     const maxP2 = Math.max(...allP2);
     phase2Speeds[order[0].pos] = maxP2 + 0.30;       // 第一名絕對最快
     phase1Speeds[order[0].pos] = Math.max(phase1Speeds[order[0].pos] || 0.85, 0.88);
-    if (S.doubleEvent && S.specialHorse2) {
-      // 第二名：在第一名之外找最大值，再加0.15
-      const maxP2excl1 = Math.max(...Object.entries(phase2Speeds)
-        .filter(([k]) => Number(k) !== order[0].pos).map(([,v]) => v));
-      phase2Speeds[order[1].pos] = maxP2excl1 + 0.15;
-      phase1Speeds[order[1].pos] = Math.max(phase1Speeds[order[1].pos] || 0.85, 0.84);
-    }
   }
 
   // ── Canvas U-Track 初始化 ──
@@ -3034,13 +3093,16 @@ function startRace() {
   canvasDone    = {};
   S.horses.forEach(h => {
     canvasDone[h.pos]     = false;
-    horseLaneY[h.pos]     = 0.5 + Math.random() * 5.0;  // 開賽時隨機分佈在跑道中段
-    horseLaneTgt[h.pos]   = 0.5 + Math.random() * 5.0;
+    horseLaneY[h.pos]     = h.pos - 1;                   // 開賽：1號外道→6號內道，依序排好
+    horseLaneTgt[h.pos]   = 0.3 + Math.random() * 5.4;  // 開跑後才開始隨機漂移
     horseLaneTimer[h.pos] = Math.random() * 1200;
   });
   raceCanvasEl  = document.getElementById('race-canvas');
   raceCtx       = raceCanvasEl.getContext('2d');
   raceCanvasEl.style.display = 'block';
+  // 初始相機：全景（raceTick 開始後才 zoom in 至起跑線）
+  const _ig = getTrackGeom();
+  cam = _ig ? { x: _ig.W / 2, y: _ig.H / 2, zoom: 1.0 } : { x: 0, y: 0, zoom: 1.0 };
   drawRaceFrame(performance.now());   // 倒數期間先顯示空跑道
 
   buildRankBar();
@@ -3081,11 +3143,12 @@ function startRace() {
         } else {
           spd = phase2Speeds[h.pos];
         }
-        const delta = spd * (RACE_FINISH_PCT - RACE_START_PCT) / CFG.RACE_DUR * dt;
+        const delta = spd * (RACE_FINISH_PCT - RACE_START_PCT) / CFG.RACE_DUR * dt * (S.turbo ? 2 : 1);
         racePositions[h.pos] = Math.min(racePositions[h.pos] + delta, OFFSCREEN_PCT);
 
         if (!crossedFinish[h.pos] && racePositions[h.pos] >= RACE_FINISH_PCT) {
           crossedFinish[h.pos] = true;
+          canvasDone[h.pos]    = true;   // 衝線後立即停止繪製，不再亂跑
           crossedCount++;
           const rank = order.findIndex(x => x.pos === h.pos) + 1;
           showFinishMarker(h, rank);
@@ -3106,7 +3169,7 @@ function startRace() {
       // ── 橫向漂移：每匹馬緩慢游移至隨機目標道次 ──
       const LANE_SPD = 0.0018; // lane 單位/ms（約 2-3 秒橫跨全道）
       S.horses.forEach(h => {
-        if (done[h.pos]) return;
+        if (done[h.pos] || crossedFinish[h.pos]) return;   // 衝線後停止漂移
         horseLaneTimer[h.pos] -= dt;
         if (horseLaneTimer[h.pos] <= 0) {
           horseLaneTgt[h.pos]   = 0.3 + Math.random() * 5.4;
@@ -3117,6 +3180,18 @@ function startRace() {
         horseLaneY[h.pos]  = Math.max(0.1, Math.min(5.9, horseLaneY[h.pos]));
       });
 
+      // 特殊馬：進度到達閾值時中途現身
+      if (S.specialHorse && !S.specialRevealed) {
+        const prog = Math.max(0, (racePositions[S.specialHorse.pos] - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT));
+        if (prog >= S.specialRevealPct) {
+          S.specialRevealed = true;
+          triggerSpecialMidReveal();
+        }
+      }
+      // 特殊馬粒子更新
+      if (S.specialRevealed) updateSpecialParticles(dt);
+
+      updateCamera(dt);
       drawRaceFrame(ts);
       updateRankBar(ts);
       if (anyRunning) raceAnimId = requestAnimationFrame(raceTick);
@@ -3224,12 +3299,10 @@ function onRaceEnd(order) {
     document.getElementById('ro-podium').innerHTML =
       order.slice(0,3).map((h,i)=>{
         let badge = '';
-        const sp1 = S.specialHorse  && h.pos === S.specialHorse.pos;
-        const sp2 = S.specialHorse2 && h.pos === S.specialHorse2.pos;
-        if (sp1 || sp2) {
-          const t  = sp1 ? S.specialType : S.specialType2;
-          const ic = t === 'BLACK' ? '♚' : '★';
-          const cl = t === 'BLACK' ? '#ccccff' : '#ffd700';
+        const sp = S.specialHorse && h.pos === S.specialHorse.pos;
+        if (sp) {
+          const ic = S.specialType === 'BLACK' ? '♚' : '★';
+          const cl = S.specialType === 'BLACK' ? '#ccccff' : '#ffd700';
           badge = `<span style="color:${cl};font-size:.85em;">${ic}</span>`;
         }
         return `<div class="ro-podium-item">
@@ -3285,6 +3358,7 @@ function onRaceEnd(order) {
 
     document.getElementById('ro-phase-lbl').textContent='🏁 比賽結束';
     document.getElementById('result-backdrop').classList.add('active');
+    markResultCells();
   }, 600);
 }
 
@@ -3294,47 +3368,37 @@ function onRaceEnd(order) {
 
 let _settleMode = null; // 'settle' | 'warn'
 
-// Step 1：玩家按「下一場」→ 關閉比賽覆蓋層，進入結算流程
 function nextRace() {
   if (raceAnimId) { cancelAnimationFrame(raceAnimId); raceAnimId = null; }
   if (camTimer)   { clearTimeout(camTimer); camTimer = null; }
   if (raceCanvasEl) raceCanvasEl.style.display = 'none';
   document.getElementById('race-overlay').classList.remove('active');
 
-  const savedResult = S.result;
-  const hasWin      = savedResult && savedResult.totalWin > 0;
-  const hasSpecial  = !!S.specialHorse;
+  const savedResult   = S.result;
+  const hasWin        = savedResult && savedResult.totalWin > 0;
+  const specialInTop3 = S.specialHorse && S.raceOrder &&
+    S.raceOrder.slice(0, 3).some(h => h.pos === S.specialHorse.pos);
 
-  // Step 1：刷新右側前三名 & 近期熱門，停留 1.5s
-  openInfoPanel();
-  animateLastRace();
-  flashInsights();
+  const BASE_DELAY  = 1000; // 停留 1 秒讓玩家看前三名標示
+  const SPECIAL_DUR = 1800; // 特殊格閃爍 + 賠率展示
+  const FLASH_DUR   = 2000; // 中獎格閃爍
 
-  const PANEL_OPEN  = 2500; // 右側資訊可見時間
-  const PANEL_FADE  = 350;  // 收合過渡
-  const SPECIAL_DUR = 1500; // 特殊馬格子亮框動畫
-  const FLASH_DUR   = 2000; // flash-win 4次 × 0.5s
-
-  setTimeout(() => closeInfoPanel(), PANEL_OPEN);
-
-  const t0 = PANEL_OPEN + PANEL_FADE; // 面板完全收合後
-
-  if (hasSpecial) {
-    // 黃金馬 / 黑金馬流程
-    setTimeout(() => flashSpecialCells(), t0);
+  if (specialInTop3) {
+    // 特殊馬入前三：先閃特殊格（賠率提升展示），再閃中獎格
+    setTimeout(() => flashSpecialCells(), BASE_DELAY);
     if (hasWin) {
-      setTimeout(() => flashWinCells(savedResult),        t0 + SPECIAL_DUR);
-      setTimeout(() => showSettleDialog(savedResult),     t0 + SPECIAL_DUR + FLASH_DUR + 150);
+      setTimeout(() => flashWinCells(savedResult),    BASE_DELAY + SPECIAL_DUR);
+      setTimeout(() => showSettleDialog(savedResult), BASE_DELAY + SPECIAL_DUR + FLASH_DUR + 150);
     } else {
-      setTimeout(() => showSettleDialog(savedResult),     t0 + SPECIAL_DUR + 150);
+      setTimeout(() => showSettleDialog(savedResult), BASE_DELAY + SPECIAL_DUR + 150);
     }
   } else {
-    // 一般流程
+    // 一般流程（含特殊馬未入前三）
     if (hasWin) {
-      setTimeout(() => flashWinCells(savedResult),        t0);
-      setTimeout(() => showSettleDialog(savedResult),     t0 + FLASH_DUR + 150);
+      setTimeout(() => flashWinCells(savedResult),    BASE_DELAY);
+      setTimeout(() => showSettleDialog(savedResult), BASE_DELAY + FLASH_DUR + 150);
     } else {
-      setTimeout(() => showSettleDialog(savedResult),     t0 + 150);
+      setTimeout(() => showSettleDialog(savedResult), BASE_DELAY + 150);
     }
   }
 }
@@ -3361,6 +3425,119 @@ function flashWinCells(result) {
   });
 }
 
+// ── 特殊馬中途現身系統 ──
+
+function triggerSpecialMidReveal() {
+  flashSpecialCells();
+  const banner  = document.getElementById('special-mid-banner');
+  const isBlack = S.specialType === 'BLACK';
+  const icon    = isBlack ? '♚' : '★';
+  const text    = isBlack ? '黑金馬現身！' : '黃金馬現身！';
+  banner.innerHTML = `
+    <span class="smb-icon">${icon}</span>
+    <span class="smb-text">${text}</span>
+    <span class="smb-sep">|</span>
+    <span class="smb-name">${S.specialHorse.pos}號 ${S.specialHorse.name}</span>
+    <span class="smb-mult">${S.specialHorse.specialMult}x</span>`;
+  banner.className = 'smb-active ' + (isBlack ? 'smb-black' : 'smb-golden');
+  setTimeout(() => { banner.className = ''; banner.innerHTML = ''; }, 3800);
+}
+
+function spawnSpecialParticle(cx, cy, isBlack, laneH) {
+  const angle  = Math.random() * Math.PI * 2;
+  const scale  = (laneH || 20) / 20;
+  const speed  = (25 + Math.random() * 65) * scale;
+  const goldenPalette = ['#ffd700','#ffee44','#ffe566','#fff0a0','#ffaa00'];
+  const blackPalette  = ['#ffffff','#aac0ff','#88aaee','#ddddff','#6688cc'];
+  const palette = isBlack ? blackPalette : goldenPalette;
+  specialParticles.push({
+    x: cx + (Math.random() - 0.5) * laneH * 0.9,
+    y: cy + (Math.random() - 0.5) * laneH * 0.5,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed - speed * 0.35,
+    life: 1,
+    decay: (1.2 + Math.random() * 2.2) / 1000,
+    size: (1.5 + Math.random() * 3.5) * scale,
+    color: palette[Math.floor(Math.random() * palette.length)],
+    glow: isBlack ? 5 : 8,
+  });
+}
+
+function updateSpecialParticles(dt) {
+  const h = S.specialHorse;
+  if (h && !canvasDone[h.pos]) {
+    const geom = getTrackGeom();
+    if (geom) {
+      const rawProg = racePositions[h.pos];
+      if (rawProg !== undefined) {
+        const progress = Math.max(0, Math.min(1, (rawProg - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT)));
+        const { x, y } = getHorsePos(progress, horseLaneY[h.pos] ?? 3, geom);
+        const isBlack = S.specialType === 'BLACK';
+        const count = 2 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) spawnSpecialParticle(x, y, isBlack, geom.laneH);
+      }
+    }
+  }
+  for (let i = specialParticles.length - 1; i >= 0; i--) {
+    const p = specialParticles[i];
+    p.x   += p.vx * dt / 1000;
+    p.y   += p.vy * dt / 1000;
+    p.vy  += 110 * dt / 1000;
+    p.life -= p.decay * dt;
+    if (p.life <= 0) specialParticles.splice(i, 1);
+  }
+}
+
+function drawSpecialParticles(ctx) {
+  if (!specialParticles.length) return;
+  for (const p of specialParticles) {
+    const a = Math.max(0, p.life);
+    ctx.save();
+    ctx.globalAlpha  = a * 0.88;
+    ctx.fillStyle    = p.color;
+    ctx.shadowBlur   = p.glow;
+    ctx.shadowColor  = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Math.max(0.1, p.size * a), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// 結算瞬間：頭像格標示前三名 + 特殊馬
+function markResultCells() {
+  if (!S.raceOrder) return;
+  const medals  = ['🥇','🥈','🥉'];
+  const top3Pos = new Set(S.raceOrder.slice(0, 3).map(h => h.pos));
+
+  // 前三名：頭像格加框 + 右上角獎牌
+  S.raceOrder.slice(0, 3).forEach((h, i) => {
+    const cell = document.querySelector(`.tl-img-cell[data-pos="${h.pos}"]`);
+    if (!cell) return;
+    cell.classList.add(`result-rank-${i + 1}`);
+    const badge = document.createElement('span');
+    badge.className = 'result-rank-badge';
+    badge.textContent = medals[i];
+    cell.appendChild(badge);
+  });
+
+  // 特殊馬（未入前三）：頭像格加特殊馬圖示
+  if (S.specialHorse && !top3Pos.has(S.specialHorse.pos)) {
+    const isBlack = S.specialType === 'BLACK';
+    const icon    = isBlack ? '♚' : '★';
+    const color   = isBlack ? '#aac0ff' : '#ffd700';
+    const cell    = document.querySelector(`.tl-img-cell[data-pos="${S.specialHorse.pos}"]`);
+    if (cell) {
+      cell.style.boxShadow = `inset 0 0 0 2px ${color}`;
+      const badge = document.createElement('span');
+      badge.className = 'result-rank-badge';
+      badge.style.cssText = `color:${color};text-shadow:0 0 5px ${color};`;
+      badge.textContent = icon;
+      cell.appendChild(badge);
+    }
+  }
+}
+
 // 特殊馬格子亮框動畫（黃金/黑金/雙馬，不論玩家是否下注）
 function flashSpecialCells() {
   if (!S.specialHorse) return;
@@ -3376,19 +3553,12 @@ function flashSpecialCells() {
   };
 
   addHorseCells(S.specialHorse);
-  if (S.doubleEvent) {
-    addHorseCells(S.specialHorse2);
-    const a = S.specialHorse.pos, b = S.specialHorse2 ? S.specialHorse2.pos : -1;
-    const qCell = document.querySelector(`[data-type="QUINELLA"][data-pos-a="${a}"][data-pos-b="${b}"]`)
-               || document.querySelector(`[data-type="QUINELLA"][data-pos-a="${b}"][data-pos-b="${a}"]`);
-    if (qCell) targets.push({ cell: qCell, cls: 'flash-special-double' });
-  }
 
   targets.forEach(({ cell, cls }) => {
     cell.classList.remove('flash-special-golden','flash-special-black','flash-special-double');
     void cell.offsetWidth;
     cell.classList.add(cls);
-    setTimeout(() => cell.classList.remove(cls), 1550);
+    setTimeout(() => cell.classList.remove(cls), 1800);
   });
 }
 
@@ -3689,7 +3859,7 @@ function renderDbg() {
     <div style="color:var(--accent-gold);font-weight:700;margin-bottom:4px;">🛠 DEBUG</div>
     <div>Phase: <b>${S.phase}</b> | Race: #${S.raceNum}</div>
     <div>Balance: $${S.balance} | Bets: ${S.bets.length}</div>
-    <div>特殊馬: ${S.doubleEvent ? '雙馬 '+S.specialHorse?.pos+'★+'+S.specialHorse2?.pos+'♚ Q='+S.doubleQOdds+'x' : S.specialHorse ? (S.specialType==='BLACK'?'黑金馬':'黃金馬')+' 馬 #'+S.specialHorse.pos+' ('+S.specialHorse.specialOdds+'x)' : '無'}</div>
+    <div>特殊馬: ${S.specialHorse ? (S.specialType==='BLACK'?'黑金馬':'黃金馬')+' 馬 #'+S.specialHorse.pos+' ('+S.specialHorse.specialOdds+'x '+S.specialHorse.specialMult+'x倍率)' : '無'}</div>
     <div>劇本: ${S.raceScript ? S.raceScript+' '+SCRIPT_NAMES[S.raceScript] : '—'}</div>
     <label style="cursor:pointer;display:block;margin-top:4px;">
       <input type="checkbox" ${S.forceGoldenHorse?'checked':''} onchange="S.forceGoldenHorse=this.checked;renderDbg();">
@@ -3698,10 +3868,6 @@ function renderDbg() {
     <label style="cursor:pointer;display:block;margin-top:2px;">
       <input type="checkbox" ${S.forceBlackHorse?'checked':''} onchange="S.forceBlackHorse=this.checked;renderDbg();">
       強制黑金馬
-    </label>
-    <label style="cursor:pointer;display:block;margin-top:2px;">
-      <input type="checkbox" ${S.forceDoubleHorse?'checked':''} onchange="S.forceDoubleHorse=this.checked;renderDbg();">
-      強制雙馬事件
     </label>
     <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
       <button onclick="nextRace()" style="background:#333;border:1px solid #555;color:#ccc;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">跳下一場</button>
@@ -3724,11 +3890,10 @@ function initRace() {
   S.bets        = [];
   S.result      = null;
   S.phase       = 'BETTING';
-  S.raceOrder       = null;
-  S.specialHorse  = null; S.specialType  = null;
-  S.specialHorse2 = null; S.specialType2 = null;
-  S.doubleEvent   = false; S.doubleQOdds  = null;
-  document.getElementById('race-lbl').textContent = 'RACE ' + S.raceNum;
+  S.raceOrder   = null;
+  S.specialHorse = null; S.specialType = null;
+  S.specialRevealed = false; S.specialRevealPct = 2;
+  specialParticles = [];
   updateBal();
   renderAll();
   document.getElementById('btn-start').disabled = false;
@@ -3752,6 +3917,9 @@ initRace();
   }, 83); // ~12 fps
 })();
 </script>
+
+<!-- 特殊馬中途現身 Banner -->
+<div id="special-mid-banner"></div>
 
 <!-- 特殊馬揭曉 Overlay -->
 <div id="special-reveal-overlay">

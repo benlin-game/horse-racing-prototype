@@ -1798,21 +1798,13 @@ function calcQuinellaProb(ha, hb) {
 // ════════════════════════════════════
 // CORE LOGIC
 // ════════════════════════════════════
-
-// 本 session 固定的 7 匹馬（F5 才換）
-let SESSION_HORSES = [];
-
-function initSessionHorses() {
-  SESSION_HORSES = [...POOL].sort(() => Math.random() - 0.5).slice(0, 7);
-}
-
 function pickHorses() {
-  // 馬匹固定用 SESSION_HORSES，每場只重新洗賠率權重
-  const weights = [...TRUE_PROB_WEIGHTS].sort(() => Math.random() - 0.5);
-  const wSum    = weights.reduce((a, b) => a + b, 0);
+  const shuffled = [...POOL].sort(() => Math.random()-.5).slice(0,7);
+  const weights  = [...TRUE_PROB_WEIGHTS].sort(() => Math.random()-.5);
+  const wSum     = weights.reduce((a,b) => a+b, 0);
 
   // 第一輪：賦予真實勝率 + 獨贏賠率（顯示值加 ±4% 雜訊製造盤口變化感）
-  const horses = SESSION_HORSES.map((h, i) => {
+  const horses = shuffled.map((h, i) => {
     const tp    = weights[i] / wSum;
     const noise = 0.98 + Math.random() * 0.04;
     return {
@@ -3900,7 +3892,6 @@ function initRace() {
 }
 
 initMachine();
-initSessionHorses(); // 本 session 固定 7 匹馬，F5 才重抽
 initRace();
 
 // ── Horse sprite animation — JS-driven, no CSS animation bugs ──

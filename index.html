@@ -165,9 +165,7 @@
     .hr-odds {
       font-family:var(--fn-mono); font-weight:700; font-size:clamp(8px,1.2vw,15px);
     }
-    .hr-odds.hot    { color:var(--color-hot); }
-    .hr-odds.mid    { color:var(--text-main); }
-    .hr-odds.cold   { color:var(--text-sub); }
+    .hr-odds        { color:var(--text-main); }
     .hr-odds.golden { color:var(--color-golden); }
     .hr-odds-unit   { font-size:.7em; opacity:.55; }
 
@@ -890,9 +888,15 @@
       to   { transform:scale(1);  opacity:1; }
     }
 
+    /* ── Canvas 賽道 ── */
+    #race-canvas {
+      position:absolute; inset:0; width:100%; height:100%;
+      z-index:6; display:none;
+    }
+
     /* ── SKILL BUBBLES ── */
     .skill-bubble {
-      position: absolute;
+      position: absolute; z-index: 25;
       background: rgba(8,14,26,.96);
       border: 1.5px solid;
       border-radius: 7px;
@@ -1304,7 +1308,8 @@
         <!-- 終點線 -->
         <div id="finish-line"></div>
         <div id="finish-flag">🏁</div>
-        <!-- 馬匹由 startRace() 注入 -->
+        <!-- Canvas U-track（馬匹與賽道由 drawRaceFrame() 繪製） -->
+        <canvas id="race-canvas"></canvas>
       </div>
       <!-- 倒數計時：race-overlay 直接子元素，不受 ro-track 鏡頭變形影響 -->
       <div id="race-countdown"></div>
@@ -1609,26 +1614,21 @@ const SKILL_SMALL = SKILL_DEFS.filter(s => !s.big);
 const SKILL_BIG   = SKILL_DEFS.filter(s =>  s.big);
 
 function showSkillBubble(horse, skill) {
-  const wrapEl  = document.getElementById('rr-' + horse.pos);
-  const track   = document.getElementById('ro-track');
-  if (!wrapEl || !track) return;
+  const track = document.getElementById('ro-track');
+  if (!track || !raceCanvasEl) return;
 
-  // 馬匹發光閃爍
-  const emojiEl = document.getElementById('ro-emoji-' + horse.pos);
-  if (emojiEl) {
-    emojiEl.style.setProperty('--sc', skill.color);
-    emojiEl.style.animation = 'skill-flash .7s ease-out forwards';
-    setTimeout(() => {
-      emojiEl.style.animation = ''; // JS timer handles background-position
-    }, 720);
-  }
+  // Canvas 技能閃光
+  horseFlashes[horse.pos] = { until: performance.now() + 700, color: skill.color };
 
-  // 定位：用馬匹當前 left% + 道次 top% 換算 px
-  const currentLeft = racePositions[horse.pos] || RACE_START_PCT;
-  const horseIdx    = [...S.horses].sort((a,b)=>a.pos-b.pos).findIndex(h=>h.pos===horse.pos);
-  const lanePct     = RACE_LANE_TOPS[horseIdx] || 60;
-  const bx = currentLeft / 100 * track.offsetWidth  + 20;
-  const by = lanePct    / 100 * track.offsetHeight - 38;
+  // 定位：用 canvas 座標換算
+  const progress = Math.max(0, Math.min(1,
+    (racePositions[horse.pos] - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT)));
+  const laneIdx = horsesByIdx.findIndex(h => h.pos === horse.pos);
+  if (laneIdx < 0) return;
+  const g  = getTrackGeom();
+  const hp = getHorsePos(progress, laneIdx, g);
+  const bx = hp.x + 18;
+  const by = hp.y - 42;
 
   const bubble = document.createElement('div');
   bubble.className  = 'skill-bubble' + (skill.big ? ' skill-bubble-big' : '');
@@ -2052,7 +2052,7 @@ function renderToteBoard() {
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
       ${wBet > 0 ? `<span class="bet-badge">$${wBet}</span>` : ''}
-      <span class="hr-odds ${wCls}">${h.winOdds}<span class="hr-odds-unit">x</span></span>`;
+      <span class="hr-odds">${h.winOdds}<span class="hr-odds-unit">x</span></span>`;
     if (betting) cell.addEventListener('click', () => placeBet('WIN', h.pos));
     winRow.appendChild(cell);
   });
@@ -2068,7 +2068,7 @@ function renderToteBoard() {
     cell.innerHTML = `
       <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
       ${pBet > 0 ? `<span class="bet-badge">$${pBet}</span>` : ''}
-      <span class="hr-odds ${pCls}">${h.placeOdds}<span class="hr-odds-unit">x</span></span>`;
+      <span class="hr-odds">${h.placeOdds}<span class="hr-odds-unit">x</span></span>`;
     if (betting) cell.addEventListener('click', () => placeBet('PLACE', h.pos));
     placeRow.appendChild(cell);
   });
@@ -2539,11 +2539,20 @@ const RACE_FINISH_PCT = 82;
 const RACE_LANE_TOPS  = [48, 54, 60, 66, 72, 78, 84];
 
 let raceAnimId    = null;
-let racePositions = {};   // h.pos → current left%
+let racePositions = {};   // h.pos → current progress value (RACE_START_PCT → OFFSCREEN_PCT)
 let rbItemsByPos  = {};   // h.pos → { el, posEl, arrowEl }
-let camTimer      = null; // 鏡頭回拉計時器
+let camTimer      = null;
 let prevRanksByPos= {};   // h.pos → last rank
 let lastArrowTs   = 0;
+
+// ── Canvas U-Track ──
+let raceCanvasEl   = null;
+let raceCtx        = null;
+const horseSprite  = new Image();
+horseSprite.src    = 'gen_tools/銀翼馬/horse_1x6.png';
+let horsesByIdx    = [];   // [...S.horses].sort(pos) — laneIdx 對應
+let canvasDone     = {};   // h.pos → bool（過終點後停止繪製）
+const horseFlashes = {};   // h.pos → { until:ms, color:str }（技能閃光）
 
 const ADS_DATA = [
   { text:'GRAND PRIX',    bg:'rgba(160,18,18,.78)',   w:138 },
@@ -2750,6 +2759,212 @@ function buildSpeedProfiles(script, order) {
 }
 
 // ════════════════════════════════════
+// U-TRACK CANVAS HELPERS
+// ════════════════════════════════════
+function getTrackGeom() {
+  const W = raceCanvasEl.offsetWidth, H = raceCanvasEl.offsetHeight;
+  const leftX = W * 0.06;
+  const bendX = W * 0.88;
+  const midY  = H * 0.50;
+  const topY  = H * 0.10;                   // 最外道（lane 0）在上直道的 y
+  const laneH = (H * 0.35) / 6;             // 7 道 6 間距，跨幅 = 35% H
+  const R3    = midY - topY - 3 * laneH;    // 中間道（laneIdx=3）半徑
+  const L_top = bendX - leftX;
+  const L_semi = Math.PI * R3;
+  const L_bot  = L_top;
+  return { W, H, leftX, bendX, midY, topY, laneH,
+           L_top, L_semi, L_bot, L_total: L_top + L_semi + L_bot };
+}
+
+function getHorsePos(progress, laneIdx, g) {
+  const d  = Math.max(0, Math.min(1, progress)) * g.L_total;
+  const ri = g.midY - g.topY - laneIdx * g.laneH;   // 此道半徑
+  if (d <= g.L_top) {
+    // 上直道：左→右
+    return { x: g.leftX + d, y: g.topY + laneIdx * g.laneH, angle: 0 };
+  } else if (d <= g.L_top + g.L_semi) {
+    // 右彎
+    const theta = Math.PI * (d - g.L_top) / g.L_semi;
+    return { x: g.bendX + ri * Math.sin(theta), y: g.midY - ri * Math.cos(theta), angle: theta };
+  } else {
+    // 下直道：右→左
+    return { x: g.bendX - (d - g.L_top - g.L_semi), y: g.midY + ri, angle: Math.PI };
+  }
+}
+
+function drawTrack(ctx, g) {
+  const { W, H, leftX, bendX, midY, topY, laneH } = g;
+  const margin = laneH * 0.4;
+  const outerR = midY - topY + margin;
+  const innerR = Math.max(midY - topY - 6 * laneH - margin, laneH * 0.3);
+  const midR   = (outerR + innerR) / 2;
+  const bandW  = outerR - innerR;
+
+  // 背景
+  ctx.fillStyle = '#071320';
+  ctx.fillRect(0, 0, W, H);
+
+  // 跑道面（上直、下直、右彎弧帶）
+  ctx.fillStyle = '#7a5228';
+  ctx.fillRect(leftX, midY - outerR, bendX - leftX, bandW);
+  ctx.fillRect(leftX, midY + innerR, bendX - leftX, bandW);
+  ctx.save();
+  ctx.lineWidth = bandW + 1;
+  ctx.strokeStyle = '#7a5228';
+  ctx.beginPath();
+  ctx.arc(bendX, midY, midR, -Math.PI / 2, Math.PI / 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // 內側草地（直道矩形 + 右彎 D 形填充）
+  ctx.fillStyle = '#0d3020';
+  ctx.fillRect(leftX, midY - innerR, bendX - leftX, innerR * 2);
+  ctx.save();
+  ctx.fillStyle = '#0d3020';
+  ctx.beginPath();
+  ctx.moveTo(bendX, midY - innerR);
+  ctx.arc(bendX, midY, innerR, -Math.PI / 2, Math.PI / 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // 內場文字
+  ctx.save();
+  ctx.font = `bold ${Math.round(laneH * 1.0)}px sans-serif`;
+  ctx.fillStyle = 'rgba(255,215,0,0.20)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('急速馬王', (leftX + bendX) / 2, midY);
+  ctx.restore();
+
+  // 道次分隔線（虛線）
+  ctx.save();
+  ctx.setLineDash([5, 9]);
+  ctx.lineWidth = 0.8;
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  for (let i = 1; i < 7; i++) {
+    const ty = topY + i * laneH;
+    const by = 2 * midY - ty;
+    ctx.beginPath(); ctx.moveTo(leftX, ty); ctx.lineTo(bendX, ty); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(leftX, by); ctx.lineTo(bendX, by); ctx.stroke();
+  }
+  // 外緣實線
+  ctx.setLineDash([]);
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+  ctx.beginPath(); ctx.moveTo(leftX, midY - outerR); ctx.lineTo(bendX, midY - outerR); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(leftX, midY + outerR); ctx.lineTo(bendX, midY + outerR); ctx.stroke();
+  ctx.beginPath(); ctx.arc(bendX, midY, outerR, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.beginPath(); ctx.arc(bendX, midY, innerR, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+  ctx.restore();
+
+  // 終點線（下直道左端）
+  const fsTop = midY + innerR;
+  const fsBot = midY + outerR;
+  const stripes = 8;
+  const sh = (fsBot - fsTop) / stripes;
+  for (let s = 0; s < stripes; s++) {
+    ctx.fillStyle = s % 2 === 0 ? '#ffffff' : '#000000';
+    ctx.fillRect(leftX - 4, fsTop + s * sh, 8, sh);
+  }
+  ctx.save();
+  ctx.font = `bold ${Math.round(laneH * 0.65)}px sans-serif`;
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.save();
+  ctx.translate(leftX - 12, (fsTop + fsBot) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('FINISH', 0, 0);
+  ctx.restore();
+  ctx.restore();
+
+  // 起跑標記（上直道左端）
+  const stTop = midY - outerR;
+  const stBot = midY - innerR;
+  ctx.fillStyle = 'rgba(46,204,113,0.75)';
+  ctx.fillRect(leftX - 3, stTop, 6, stBot - stTop);
+}
+
+function drawHorses(ctx, geom, frameIdx, ts) {
+  const SW = 52, SH = 52;
+  const drawSz = Math.round(geom.laneH * 1.7);   // canvas 繪製尺寸（縮放後）
+  const half   = drawSz / 2;
+
+  horsesByIdx.forEach((h, laneIdx) => {
+    if (canvasDone[h.pos]) return;
+    const rawProg = racePositions[h.pos];
+    if (rawProg === undefined) return;
+    const progress = (rawProg - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT);
+    const { x, y, angle } = getHorsePos(Math.min(progress, 1.0), laneIdx, geom);
+    const sx = (frameIdx % 6) * SW;
+
+    const isSpec1 = S.specialHorse  && h.pos === S.specialHorse.pos;
+    const isSpec2 = S.specialHorse2 && h.pos === S.specialHorse2.pos;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 光暈
+    const flash = horseFlashes[h.pos];
+    if (flash && ts < flash.until) {
+      ctx.shadowBlur = 18; ctx.shadowColor = flash.color;
+    } else if (isSpec1 || isSpec2) {
+      const gc = ((isSpec1 && S.specialType === 'GOLDEN') || (isSpec2 && S.specialType2 === 'GOLDEN'))
+        ? '#ffd700' : '#66aaff';
+      ctx.shadowBlur = 12; ctx.shadowColor = gc;
+    } else {
+      ctx.shadowBlur = 0;
+    }
+
+    // 繪製馬匹精靈（依角度旋轉或翻轉）
+    if (angle <= Math.PI / 2 + 0.05) {
+      // 向右 / 向下右：正常旋轉
+      ctx.rotate(angle);
+      ctx.drawImage(horseSprite, sx, 0, SW, SH, -half, -half, drawSz, drawSz);
+    } else {
+      // 向左 / 向下左：水平翻轉
+      ctx.scale(-1, 1);
+      ctx.rotate(Math.PI - angle);
+      ctx.drawImage(horseSprite, sx, 0, SW, SH, -half, -half, drawSz, drawSz);
+    }
+    ctx.restore();
+
+    // 號碼圓（馬匹上方或下方）
+    const circR = Math.max(7, Math.round(geom.laneH * 0.50));
+    const offY  = angle < Math.PI * 0.8 ? -(half + circR + 1) : (half + circR + 1);
+    const cx = x, cy = y + offY;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, circR, 0, Math.PI * 2);
+    ctx.fillStyle   = h.color || '#888';
+    ctx.globalAlpha = 0.92;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle    = '#fff';
+    ctx.font         = `bold ${Math.round(circR * 1.1)}px sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(h.pos, cx, cy);
+    ctx.restore();
+  });
+}
+
+function drawRaceFrame(ts) {
+  if (!raceCtx || !raceCanvasEl) return;
+  const W = raceCanvasEl.offsetWidth, H = raceCanvasEl.offsetHeight;
+  if (raceCanvasEl.width !== W || raceCanvasEl.height !== H) {
+    raceCanvasEl.width = W; raceCanvasEl.height = H;
+  }
+  const geom = getTrackGeom();
+  drawTrack(raceCtx, geom);
+  drawHorses(raceCtx, geom, Math.floor(ts / 80) % 6, ts);
+}
+
+// ════════════════════════════════════
 // RACE
 // ════════════════════════════════════
 function startRace() {
@@ -2813,57 +3028,21 @@ function startRace() {
     }
   }
 
-  // ── 建立馬匹 DOM（靜止於起點）──
+  // ── Canvas U-Track 初始化 ──
   racePositions = {};
-  const track = document.getElementById('ro-track');
-  [...S.horses].sort((a, b) => a.pos - b.pos).forEach((h, i) => {
-    racePositions[h.pos] = RACE_START_PCT;
-    const wrap  = document.createElement('div');
-    const isSpecial1 = S.specialHorse  && h.pos === S.specialHorse.pos;
-    const isSpecial2 = S.specialHorse2 && h.pos === S.specialHorse2.pos;
-    const isSpecialH = isSpecial1 || isSpecial2;
-    const sType = isSpecial1 ? S.specialType : (isSpecial2 ? S.specialType2 : null);
-    const specialCls = isSpecialH ? (' special-' + sType.toLowerCase()) : '';
-    wrap.className = 'ro-horse-wrap' + specialCls;
-    wrap.id = 'rr-' + h.pos;
-    wrap.style.cssText = `left:${RACE_START_PCT}%;top:${RACE_LANE_TOPS[i]}%;color:${h.color};`;
-    const num   = document.createElement('div');
-    num.className = 'ro-horse-num';
-    num.style.cssText = `color:${h.color};border-color:${h.color};background:${h.color}33;`;
-    num.textContent = h.pos;
-    const emoji = document.createElement('div');
-    emoji.className = 'ro-horse-sprite';
-    emoji.id = 'ro-emoji-' + h.pos;
-    const name  = document.createElement('div');
-    name.className = 'ro-horse-name';
-    const specialPrefix = isSpecialH ? (sType === 'BLACK' ? '♚ ' : '★ ') : '';
-    name.textContent = specialPrefix + h.name;
-    wrap.append(num, emoji, name);
-    track.appendChild(wrap);
-  });
+  horsesByIdx   = [...S.horses].sort((a, b) => a.pos - b.pos);
+  horsesByIdx.forEach(h => { racePositions[h.pos] = RACE_START_PCT; });
+  canvasDone    = {};
+  S.horses.forEach(h => { canvasDone[h.pos] = false; });
+  raceCanvasEl  = document.getElementById('race-canvas');
+  raceCtx       = raceCanvasEl.getContext('2d');
+  raceCanvasEl.style.display = 'block';
 
   buildRankBar();
-
-  // ── 鏡頭：起跑特寫（立即、無 transition）──
-  if (camTimer) clearTimeout(camTimer);
-  const trackEl = document.getElementById('ro-track');
-  const rankBar = document.getElementById('ro-rank-bar');
-  trackEl.style.transition = 'none';
-  trackEl.style.transform  = 'translateX(75.6%) translateY(-28.8%) scale(1.8)';
-  rankBar.style.opacity = '0';
 
   // ── 3-2-1-GO! 倒數，完成後才啟動跑馬動畫 ──
   showCountdown(() => {
     document.getElementById('ro-phase-lbl').textContent = '🏇 比賽開始！';
-
-    // 鏡頭：倒數結束後 1.5s 回拉到正常視角
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      trackEl.style.transition = 'transform 1.2s cubic-bezier(.4,0,.2,1)';
-      camTimer = setTimeout(() => {
-        trackEl.style.transform = 'none';
-        setTimeout(() => { rankBar.style.opacity = '1'; }, 1000);
-      }, 1500);
-    }));
 
     // 技能（落後馬在比賽中段觸發）
     const T3 = CFG.RACE_DUR + CFG.RACE_DUR * 0.4;
@@ -2871,14 +3050,12 @@ function startRace() {
 
     // ── rAF 跑馬主迴圈 ──
     if (raceAnimId) cancelAnimationFrame(raceAnimId);
-    const OFFSCREEN_PCT       = 115;
-    const FINISH_ZOOM_TRIGGER = 60;
-    let lastTs        = null;
+    const OFFSCREEN_PCT = 115;
+    let lastTs          = null;
     const done          = {};
     const crossedFinish = {};
     let crossedCount    = 0;
     let raceEndCalled   = false;
-    let finishZoomDone  = false;
     S.horses.forEach(h => { done[h.pos] = false; crossedFinish[h.pos] = false; });
 
     function raceTick(ts) {
@@ -2901,15 +3078,12 @@ function startRace() {
         }
         const delta = spd * (RACE_FINISH_PCT - RACE_START_PCT) / CFG.RACE_DUR * dt;
         racePositions[h.pos] = Math.min(racePositions[h.pos] + delta, OFFSCREEN_PCT);
-        const el = document.getElementById('rr-' + h.pos);
-        if (el) el.style.left = racePositions[h.pos] + '%';
 
         if (!crossedFinish[h.pos] && racePositions[h.pos] >= RACE_FINISH_PCT) {
           crossedFinish[h.pos] = true;
           crossedCount++;
           const rank = order.findIndex(x => x.pos === h.pos) + 1;
           showFinishMarker(h, rank);
-          // 全部馬過線後才觸發結算
           if (crossedCount === S.horses.length && !raceEndCalled) {
             raceEndCalled = true;
             onRaceEnd(order);
@@ -2918,21 +3092,13 @@ function startRace() {
 
         if (racePositions[h.pos] >= OFFSCREEN_PCT) {
           done[h.pos] = true;
-          if (el) el.style.visibility = 'hidden';
+          canvasDone[h.pos] = true;
         } else {
           anyRunning = true;
         }
       });
 
-      // 終點特寫：領先馬到 60% 時放大，終點線居中
-      if (!finishZoomDone && racePositions[order[0].pos] >= FINISH_ZOOM_TRIGGER) {
-        finishZoomDone = true;
-        if (camTimer) { clearTimeout(camTimer); camTimer = null; }
-        rankBar.style.opacity = '0';
-        trackEl.style.transition = 'transform 0.9s cubic-bezier(.4,0,.2,1)';
-        trackEl.style.transform  = 'translateX(-67.2%) translateY(-25.6%) scale(1.6)';
-      }
-
+      drawRaceFrame(ts);
       updateRankBar(ts);
       if (anyRunning) raceAnimId = requestAnimationFrame(raceTick);
     }
@@ -3113,9 +3279,7 @@ let _settleMode = null; // 'settle' | 'warn'
 function nextRace() {
   if (raceAnimId) { cancelAnimationFrame(raceAnimId); raceAnimId = null; }
   if (camTimer)   { clearTimeout(camTimer); camTimer = null; }
-  const trackEl = document.getElementById('ro-track');
-  trackEl.style.transition = 'none';
-  trackEl.style.transform  = 'none';
+  if (raceCanvasEl) raceCanvasEl.style.display = 'none';
   document.getElementById('race-overlay').classList.remove('active');
 
   const savedResult = S.result;

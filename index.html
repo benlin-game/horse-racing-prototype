@@ -658,14 +658,13 @@
     }
     .ro-horse-wrap.golden .ro-horse-name { color:#ffd700; }
 
-    /* ── 即時排名欄（固定在 #ro-track 頂部） ── */
+    /* ── 即時排名欄（race-overlay flex 列） ── */
     #ro-rank-bar {
-      position:absolute; top:0; left:0; right:0;
+      flex-shrink:0;
       height:clamp(28px,5vh,42px);
       background:rgba(0,0,0,.82); border-bottom:1px solid rgba(255,215,0,.22);
       backdrop-filter:blur(6px);
-      z-index:20; display:flex; align-items:stretch;
-      transition: opacity 0.4s;
+      display:flex; align-items:stretch;
     }
     #ro-rank-bar .rb-title {
       flex-shrink:0; width:clamp(32px,5vw,52px);
@@ -1281,6 +1280,10 @@
         <span id="ro-phase-lbl">🏇 比賽開始！</span>
         <button id="btn-skip" onclick="skipRace()">⏭ 跳過</button>
       </div>
+      <!-- 即時排名欄（在 ro-track 外，不覆蓋 canvas） -->
+      <div id="ro-rank-bar">
+        <div class="rb-title">即時<br>排名</div>
+      </div>
       <div id="ro-track">
         <!-- Parallax 背景（由 JS 建立內容） -->
         <div class="ro-sky"></div>
@@ -1292,10 +1295,6 @@
         </div>
         <div class="ro-ground"></div>
         <div id="ro-grass"></div>
-        <!-- 即時排名欄 -->
-        <div id="ro-rank-bar">
-          <div class="rb-title">即時<br>排名</div>
-        </div>
         <!-- Canvas U-track（馬匹與賽道由 drawRaceFrame() 繪製） -->
         <canvas id="race-canvas"></canvas>
       </div>
@@ -2754,8 +2753,8 @@ function getTrackGeom() {
   const leftX = W * 0.06;
   const bendX = W * 0.87;
   const midY  = H * 0.50;
-  const topY  = H * 0.08;                   // 最外道（lane 0）在上直道的 y
-  const laneH = (H * 0.28) / 6;             // 7 道 6 間距，跨幅 = 28% H（讓內側半徑夠大）
+  const topY  = H * 0.05;                   // 最外道（lane 0）在上直道的 y
+  const laneH = (H * 0.30) / 6;             // 7 道 6 間距，跨幅 = 30% H
   const R3    = midY - topY - 3 * laneH;    // 中間道（laneIdx=3）半徑
   const L_top = bendX - leftX;
   const L_semi = Math.PI * R3;

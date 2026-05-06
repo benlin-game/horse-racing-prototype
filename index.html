@@ -3025,7 +3025,7 @@ function startRace() {
 
   // ── Canvas U-Track 初始化 ──
   racePositions = {};
-  horsesByIdx   = [...S.horses].sort((a, b) => a.pos - b.pos);
+  horsesByIdx   = [...S.horses].sort(() => Math.random() - 0.5);
   horsesByIdx.forEach(h => { racePositions[h.pos] = RACE_START_PCT; });
   canvasDone    = {};
   S.horses.forEach(h => { canvasDone[h.pos] = false; });

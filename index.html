@@ -178,11 +178,11 @@
     }
     .tl-odds-cell:last-child  { border-right:none; }
     .tl-odds-cell:hover       { background:rgba(255,255,255,.05); }
-    .tl-odds-cell.sel         { background:var(--sel-bg); outline:1.5px solid var(--border-sel); }
+    .tl-odds-cell.sel         { background:var(--sel-bg); }
     .tl-odds-cell.golden      { background:var(--golden-bg); }
-    .tl-odds-cell.golden.sel  { background:rgba(255,215,0,.22); outline:1.5px solid var(--gold-bright); }
+    .tl-odds-cell.golden.sel  { background:rgba(255,215,0,.22); }
     .tl-odds-cell.black-sp    { background:rgba(80,60,180,.28); }
-    .tl-odds-cell.black-sp.sel{ background:rgba(100,80,220,.38); outline:1.5px solid #99aaff; }
+    .tl-odds-cell.black-sp.sel{ background:rgba(100,80,220,.38); }
     /* 倍率標籤：右上 */
     .sr-mult-tag {
       position:absolute; top:3px; right:3px;
@@ -236,9 +236,9 @@
     }
     .tl-q-cell:last-child    { border-right:none; }
     .tl-q-cell:hover         { background:rgba(255,255,255,.05); }
-    .tl-q-cell.sel           { background:var(--sel-bg); outline:1.5px solid var(--border-sel); }
+    .tl-q-cell.sel           { background:var(--sel-bg); }
     .tl-q-cell.golden        { background:var(--golden-bg); }
-    .tl-q-cell.golden.sel    { background:rgba(255,215,0,.25); outline:1.5px solid var(--gold-bright); }
+    .tl-q-cell.golden.sel    { background:rgba(255,215,0,.25); }
     /* 兩個彩色圈圈：左上 */
     .tl-q-pair {
       position:absolute; top:3px; left:3px;
@@ -246,7 +246,7 @@
     }
     .tl-q-num {
       width:clamp(11px,1.5vw,18px); height:clamp(11px,1.5vw,18px);
-      border-radius:50%; border:1.5px solid currentColor;
+      border-radius:4px; border:1.5px solid currentColor;
       display:flex; align-items:center; justify-content:center;
       font-size:clamp(5px,.62vw,8px); font-weight:700; font-family:var(--fn-mono);
       flex-shrink:0;
@@ -260,7 +260,7 @@
     .tl-q-cell.golden .tl-q-odds { color:var(--color-golden); }
     .tl-q-cell.sel    .tl-q-odds { color:var(--gold-bright); }
 
-    /* 投注金額徽章：右上角 */
+    /* 投注金額徽章：右上角（保留備用，目前由 bet-cell-inner 取代） */
     .bet-badge {
       position:absolute; top:3px; right:3px;
       background:var(--accent-gold); color:#000;
@@ -269,12 +269,54 @@
       border-radius:2px; pointer-events:none; line-height:1.4; white-space:nowrap;
     }
 
-    /* ── 中獎格閃爍 ── */
-    @keyframes flash-win {
-      0%,100% { background:inherit; }
-      35%,65% { background:rgba(46,204,113,.22); outline:2px solid #2ecc71; }
+    /* ── 有注時二段格樣式 ── */
+    .bet-cell-inner {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; overflow:hidden;
     }
-    .flash-win { animation:flash-win .5s ease-in-out 4; }
+    .bci-top {
+      flex:1;
+      background:rgba(42,201,140,.65);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 clamp(2px,.3vw,4px); gap:2px; min-width:0; overflow:hidden;
+    }
+    .bci-bot {
+      flex:0 0 40%;
+      background:rgba(173,210,168,.55);
+      display:flex; align-items:center; justify-content:flex-end;
+      padding:0 clamp(2px,.3vw,4px);
+    }
+    .bci-badges { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+    .bci-num {
+      width:clamp(11px,1.5vw,17px); height:clamp(11px,1.5vw,17px);
+      border-radius:3px; border:1.5px solid currentColor;
+      display:flex; align-items:center; justify-content:center;
+      font-size:clamp(5px,.72vw,9px); font-weight:700; font-family:var(--fn-mono);
+      flex-shrink:0;
+    }
+    .bci-amount {
+      color:#FFB300;
+      font-family:var(--fn-mono); font-weight:900;
+      font-size:clamp(7px,1.05vw,14px); line-height:1;
+      white-space:nowrap; text-align:right; flex:1; min-width:0;
+      overflow:hidden; text-overflow:ellipsis;
+    }
+    .bci-odds {
+      color:#1a4020;
+      font-family:var(--fn-mono); font-weight:700;
+      font-size:clamp(5px,.78vw,10px); line-height:1;
+    }
+
+    /* ── 中獎格閃爍（用 ::after overlay，穿透 bet-cell-inner）── */
+    @keyframes flash-win-overlay {
+      0%,100% { opacity:0; }
+      35%,65% { opacity:1; }
+    }
+    .flash-win::after {
+      content:''; position:absolute; inset:0; z-index:100;
+      background:rgba(46,204,113,.5); pointer-events:none;
+      animation:flash-win-overlay .5s ease-in-out 4;
+    }
 
     /* ── 特殊馬格子亮框動畫 ── */
     @keyframes flash-special-golden {
@@ -295,6 +337,12 @@
     .flash-special-golden { animation:flash-special-golden 1.8s ease-in-out forwards; }
     .flash-special-black  { animation:flash-special-black  1.8s ease-in-out forwards; }
     .flash-special-double { animation:flash-special-double 1.8s ease-in-out forwards; }
+    /* 特殊馬賠率刷新後：金色字 + 紅色光暈 */
+    .odds-refreshed {
+      color:#FFD700 !important;
+      text-shadow:0 0 4px rgba(255,30,0,.95), 0 0 10px rgba(255,80,0,.65) !important;
+      font-weight:900 !important;
+    }
     /* 結算時賠率提升脈動：讓 .sr-mult-tag 跳大 */
     @keyframes mult-boost-pulse {
       0%   { transform:scale(1);    opacity:1; }
@@ -447,6 +495,29 @@
     .ro-horse-wrap.special-golden .ro-horse-name { color:#ffd700 !important; font-weight:900; }
     .ro-horse-wrap.special-black  .ro-horse-name { color:#ccccff !important; font-weight:900; }
 
+    /* ── 大招 Dialog ── */
+    #big-move-overlay {
+      position:fixed; inset:0; z-index:220;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .3s;
+    }
+    #big-move-overlay.active { opacity:1; }
+    #big-move-box {
+      background:linear-gradient(135deg,rgba(10,10,30,.95),rgba(30,10,50,.95));
+      border:2px solid #cc44ff; border-radius:16px;
+      padding:clamp(16px,3vh,32px) clamp(20px,4vw,48px);
+      text-align:center; box-shadow:0 0 40px rgba(180,80,255,.6);
+      animation:bm-pulse 0.6s ease-out;
+    }
+    @keyframes bm-pulse {
+      0%   { transform:scale(.7); opacity:0; }
+      60%  { transform:scale(1.06); }
+      100% { transform:scale(1); opacity:1; }
+    }
+    #bm-icon  { font-size:clamp(28px,4vw,52px); line-height:1.1; }
+    #bm-name  { font-size:clamp(18px,2.6vw,36px); font-weight:900; color:#e080ff; letter-spacing:.06em; margin:.2em 0; }
+    #bm-sub   { font-size:clamp(10px,1.2vw,16px); color:#cc99ff; opacity:.85; }
+
     /* ── 結算 Dialog ── */
     .settle-overlay {
       position:fixed; inset:0; z-index:200;
@@ -539,6 +610,34 @@
       padding:4% 5%; display:flex; flex-direction:row;
       align-items:center; gap:6%;
       min-width:0; overflow:hidden; animation:cd-appear .25s ease-out;
+      cursor:pointer; transition:border-color .15s, background .15s;
+    }
+    .insight-card:hover { background:rgba(255,255,255,.05); border-color:var(--accent-gold); }
+    .insight-card.ic-active { border-color:var(--accent-gold); background:rgba(201,162,39,.10); }
+    #ic-tooltip {
+      position:fixed; z-index:9000;
+      background:rgba(12,20,38,.97);
+      border:1px solid rgba(120,170,255,.45);
+      border-radius:8px;
+      padding:7px 11px;
+      font-size:clamp(9px,1vw,12px);
+      color:#c0d4f0;
+      max-width:160px;
+      line-height:1.45;
+      pointer-events:none;
+      opacity:0; transform:translateY(4px);
+      transition:opacity .14s, transform .14s;
+      box-shadow:0 6px 20px rgba(0,0,0,.6);
+    }
+    #ic-tooltip.ic-tt-show { opacity:1; transform:translateY(0); pointer-events:auto; }
+    #ic-tooltip::after {
+      content:'';
+      position:absolute; bottom:-6px; left:50%;
+      transform:translateX(-50%);
+      width:0; height:0;
+      border-left:6px solid transparent;
+      border-right:6px solid transparent;
+      border-top:6px solid rgba(120,170,255,.45);
     }
     .ic-left  { display:flex; align-items:center; gap:5%; flex-shrink:0; }
     .ic-icon  { font-size:clamp(11px,1.5vw,18px); flex-shrink:0; }
@@ -559,6 +658,8 @@
     .ic-title  { font-size:clamp(5px,.75vw,9px); font-weight:700; color:var(--text-sub); letter-spacing:.06em; }
     .ic-horse  { font-size:clamp(7px,.95vw,11px); font-weight:700; }
     .ic-desc   { font-size:clamp(5px,.68vw,8px); color:var(--text-sub); }
+    .ic-big-num { font-family:var(--fn-mono); font-weight:900; font-size:clamp(18px,2.8vw,36px); line-height:1; }
+    .ic-big-lbl { font-size:clamp(6px,.8vw,10px); color:var(--text-sub); margin-top:2%; }
     .insight-empty { font-size:clamp(7px,.9vw,11px); color:var(--text-dim); text-align:center; padding:4% 0; }
     /* 籌碼 */
     #panel-chips {
@@ -622,13 +723,16 @@
     .pf-btn.primary:hover  { background:var(--gold-bright); border-color:var(--gold-bright); }
     /* 跳過比賽按鈕 */
     #btn-skip {
-      padding:0 clamp(8px,1.4vw,18px); height:clamp(18px,3.5vh,30px);
-      border-radius:4px; border:1px solid rgba(255,255,255,.2);
-      background:rgba(255,255,255,.08); color:rgba(255,255,255,.6);
-      font-size:clamp(7px,1vw,12px); font-weight:600;
+      position:absolute; bottom:clamp(10px,2vh,20px); right:clamp(10px,2vw,20px);
+      z-index:60;
+      padding:0 clamp(10px,1.6vw,20px); height:clamp(24px,4vh,36px);
+      border-radius:6px; border:1px solid rgba(255,255,255,.25);
+      background:rgba(0,0,0,.55); color:rgba(255,255,255,.65);
+      font-size:clamp(8px,1vw,13px); font-weight:600;
       cursor:pointer; transition:all .12s; white-space:nowrap;
+      backdrop-filter:blur(4px);
     }
-    #btn-skip:hover { background:rgba(255,255,255,.18); color:#fff; }
+    #btn-skip:hover { background:rgba(255,255,255,.15); color:#fff; border-color:rgba(255,255,255,.45); }
 
     /* ── RACE OVERLAY ── */
     #race-overlay {
@@ -637,13 +741,6 @@
       flex-direction:column;
     }
     #race-overlay.active { display:flex; }
-    #ro-header {
-      display:flex; align-items:center; justify-content:center; gap:1em;
-      padding:1.5% 2%;
-      border-bottom:1px solid var(--border);
-      font-size:clamp(10px,1.6vw,20px); font-weight:700;
-      color:var(--accent-gold); letter-spacing:.08em;
-    }
     #ro-track {
       flex:1; position:relative; overflow:hidden;
       will-change:transform;
@@ -893,10 +990,19 @@
     #btn-next:hover { background:var(--gold-bright); }
 
     /* ── DEBUG ── */
+    #dbg-toggle {
+      position:fixed; top:6px; right:6px; z-index:9999;
+      width:26px; height:26px; border-radius:5px;
+      background:rgba(0,0,0,.55); border:1px solid #444;
+      color:#666; font-size:14px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:all .15s; line-height:1;
+    }
+    #dbg-toggle:hover { background:rgba(0,0,0,.8); color:#aaa; border-color:#666; }
     #dbg {
-      display:none; position:absolute; bottom:0; right:0; z-index:100;
+      display:none; position:fixed; top:36px; right:0; z-index:9998;
       background:rgba(0,0,0,.88); border:1px solid #333;
-      border-radius:8px 0 0 0; padding:6px 10px;
+      border-radius:8px 0 0 8px; padding:6px 10px;
       font-size:11px; color:#aaa; font-family:monospace; min-width:160px;
     }
 
@@ -1348,10 +1454,7 @@
 
     <!-- ══ RACE OVERLAY ══ -->
     <div id="race-overlay">
-      <div id="ro-header">
-        <span id="ro-phase-lbl">🏇 比賽開始！</span>
-        <button id="btn-skip" onclick="skipRace()">⏭ 跳過</button>
-      </div>
+      <button id="btn-skip" onclick="skipRace()">⏭ 跳過</button>
       <!-- 即時排名欄（在 ro-track 外，不覆蓋 canvas） -->
       <div id="ro-rank-bar">
         <div class="rb-title">即時<br>排名</div>
@@ -1472,10 +1575,12 @@ const CFG = {
   RTP_PLACE:       0.94,   // 位置 RTP 94%
   RTP_QUINELLA:    0.90,   // 連贏 RTP 90%
   // 黃金馬 / 黑金馬（投注後揭曉，賠率倍率加成，名次隨機）
-  GOLDEN_HORSE_CHANCE:   0.06,        // 黃金馬觸發率 6%
-  BLACK_HORSE_CHANCE:    0.015,       // 黑金馬觸發率 1.5%
-  GOLDEN_MULTIPLIERS:    [2, 3, 4],   // 黃金馬隨機賠率倍數
-  BLACK_MULTIPLIERS:     [3, 5, 8],   // 黑金馬隨機賠率倍數
+  GOLDEN_HORSE_CHANCE:   0.06,   // 黃金馬觸發率 6%
+  BLACK_HORSE_CHANCE:    0.015,  // 黑金馬觸發率 1.5%
+  GOLDEN_WIN_MULT:       1.5,    // 黃金馬獨贏倍率（固定）
+  GOLDEN_PLACE_MULT:     1.2,    // 黃金馬位置倍率（固定）
+  BLACK_WIN_MULT:        3,      // 黑金馬獨贏倍率（固定）
+  BLACK_PLACE_MULT:      2,      // 黑金馬位置倍率（固定）
 };
 
 // ════════════════════════════════════
@@ -1607,6 +1712,8 @@ const S = {
   specialType:     null,   // 'GOLDEN' | 'BLACK' | null
   forceGoldenHorse: false,
   forceBlackHorse:  false,
+  forceGoldenFirst: false,
+  forceBlackFirst:  false,
   turbo:            false,   // 加速模式（x2 速度）
 };
 
@@ -1845,13 +1952,15 @@ function checkAndApplySpecialHorse() {
   // 任意一匹馬都可成為特殊馬
   const target = S.horses[Math.floor(Math.random() * S.horses.length)];
 
-  // 隨機選倍數，乘上當前市場賠率
-  const mults = type === 'GOLDEN' ? CFG.GOLDEN_MULTIPLIERS : CFG.BLACK_MULTIPLIERS;
-  const mult  = mults[Math.floor(Math.random() * mults.length)];
-  target.specialOdds      = +(target.winOdds   * mult).toFixed(1);
-  target.specialPlaceOdds = +(target.placeOdds * mult).toFixed(1);
-  target.specialType = type;
-  target.specialMult = mult;
+  // 固定倍率：WIN / PLACE 分開，QUINELLA 不受影響
+  const winMult   = type === 'GOLDEN' ? CFG.GOLDEN_WIN_MULT   : CFG.BLACK_WIN_MULT;
+  const placeMult = type === 'GOLDEN' ? CFG.GOLDEN_PLACE_MULT : CFG.BLACK_PLACE_MULT;
+  target.specialOdds      = +(target.winOdds   * winMult).toFixed(1);
+  target.specialPlaceOdds = +(target.placeOdds * placeMult).toFixed(1);
+  target.specialType      = type;
+  target.specialMult      = winMult;    // 主顯示用（獨贏倍率）
+  target.specialWinMult   = winMult;
+  target.specialPlaceMult = placeMult;
 
   // 升級已下注的對應格
   S.bets.forEach(bet => {
@@ -1877,9 +1986,9 @@ function showSpecialReveal(callback) {
     <div class="sr-icon">${isBlack ? '🖤' : '✨'}</div>
     <div class="sr-label">${isBlack ? '【黑金馬】降臨！' : '【黃金馬】出現！'}</div>
     <div class="sr-horse">${S.specialHorse.pos}號 ${S.specialHorse.name}</div>
-    <div class="sr-odds" style="color:${multColor}">${S.specialHorse.specialMult}x 賠率加成！</div>
+    <div class="sr-odds" style="color:${multColor}">獨贏 ${S.specialHorse.specialWinMult}x ／ 位置 ${S.specialHorse.specialPlaceMult}x 加成</div>
     <div class="sr-sub">獨贏 <b style="color:${multColor}">${S.specialHorse.specialOdds}x</b>　位置 <b style="color:${multColor}">${S.specialHorse.specialPlaceOdds}x</b></div>
-    <div class="sr-sub" style="opacity:.6;font-size:.85em;">名次隨緣・賠率加倍！</div>
+    <div class="sr-sub" style="opacity:.6;font-size:.85em;">名次隨緣・連贏不影響</div>
     <div class="sr-hint">點擊任意處繼續</div>`;
 
   overlay.classList.add('active');
@@ -2022,11 +2131,17 @@ function renderToteBoard() {
     const cell = document.createElement('div');
     cell.className = `tl-odds-cell${wBet>0?' sel':''}${specCls}`;
     cell.dataset.type = 'WIN'; cell.dataset.pos = h.pos;
-    cell.innerHTML = `
-      <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
-      ${wBet > 0 ? `<span class="bet-badge">$${wBet}</span>` : ''}
-      ${isSpec ? `<span class="sr-mult-tag">${h.specialMult}x</span>` : ''}
-      <span class="hr-odds${isSpec?' golden':''}">${wOdds}<span class="hr-odds-unit">x</span></span>`;
+    cell.innerHTML = wBet > 0
+      ? `<div class="bet-cell-inner">
+           <div class="bci-top">
+             <div class="bci-badges"><div class="bci-num" style="color:${h.color};border-color:${h.color}">${h.pos}</div></div>
+             <span class="bci-amount">$${wBet}</span>
+           </div>
+           <div class="bci-bot"><span class="bci-odds">${wOdds}x</span></div>
+         </div>`
+      : `<div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
+         ${isSpec ? `<span class="sr-mult-tag">${h.specialMult}x</span>` : ''}
+         <span class="hr-odds${isSpec?' golden':''}">${wOdds}<span class="hr-odds-unit">x</span></span>`;
     if (betting) cell.addEventListener('click', () => placeBet('WIN', h.pos));
     winRow.appendChild(cell);
   });
@@ -2041,11 +2156,17 @@ function renderToteBoard() {
     const cell = document.createElement('div');
     cell.className = `tl-odds-cell${pBet>0?' sel':''}${specCls}`;
     cell.dataset.type = 'PLACE'; cell.dataset.pos = h.pos;
-    cell.innerHTML = `
-      <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
-      ${pBet > 0 ? `<span class="bet-badge">$${pBet}</span>` : ''}
-      ${isSpec ? `<span class="sr-mult-tag">${h.specialMult}x</span>` : ''}
-      <span class="hr-odds${isSpec?' golden':''}">${pOdds}<span class="hr-odds-unit">x</span></span>`;
+    cell.innerHTML = pBet > 0
+      ? `<div class="bet-cell-inner">
+           <div class="bci-top">
+             <div class="bci-badges"><div class="bci-num" style="color:${h.color};border-color:${h.color}">${h.pos}</div></div>
+             <span class="bci-amount">$${pBet}</span>
+           </div>
+           <div class="bci-bot"><span class="bci-odds">${pOdds}x</span></div>
+         </div>`
+      : `<div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
+         ${isSpec ? `<span class="sr-mult-tag">${h.specialMult}x</span>` : ''}
+         <span class="hr-odds${isSpec?' golden':''}">${pOdds}<span class="hr-odds-unit">x</span></span>`;
     if (betting) cell.addEventListener('click', () => placeBet('PLACE', h.pos));
     placeRow.appendChild(cell);
   });
@@ -2079,13 +2200,22 @@ function renderQuinellaGrid() {
       const cell   = document.createElement('div');
       cell.className = `tl-q-cell${betAmt>0?' sel':''}`;
       cell.dataset.type = 'QUINELLA'; cell.dataset.posA = ha.pos; cell.dataset.posB = hb.pos;
-      cell.innerHTML = `
-        <div class="tl-q-pair">
-          <span class="tl-q-num" style="color:${ha.color};border-color:${ha.color}">${ha.pos}</span>
-          <span class="tl-q-num" style="color:${hb.color};border-color:${hb.color}">${hb.pos}</span>
-        </div>
-        ${betAmt > 0 ? `<span class="bet-badge">$${betAmt}</span>` : ''}
-        <div class="tl-q-odds">${odds}x</div>`;
+      cell.innerHTML = betAmt > 0
+        ? `<div class="bet-cell-inner">
+             <div class="bci-top">
+               <div class="bci-badges">
+                 <span class="tl-q-num" style="color:${ha.color};border-color:${ha.color}">${ha.pos}</span>
+                 <span class="tl-q-num" style="color:${hb.color};border-color:${hb.color}">${hb.pos}</span>
+               </div>
+               <span class="bci-amount">$${betAmt}</span>
+             </div>
+             <div class="bci-bot"><span class="bci-odds">${odds}x</span></div>
+           </div>`
+        : `<div class="tl-q-pair">
+             <span class="tl-q-num" style="color:${ha.color};border-color:${ha.color}">${ha.pos}</span>
+             <span class="tl-q-num" style="color:${hb.color};border-color:${hb.color}">${hb.pos}</span>
+           </div>
+           <div class="tl-q-odds">${odds}x</div>`;
       if (betting) cell.addEventListener('click', () => placeQuinellaBet(ha.pos, hb.pos));
       rowEl.appendChild(cell);
     }
@@ -2267,12 +2397,14 @@ function getInsights() {
   }
 
   // 久未奪冠（≥5 場）
+  // S.raceNum 是「當前投注中」場次，S.raceNum-1 才是最後完賽場次
+  const completedRaces = S.raceNum - 1;
   const lastWinRace = {};
   hist.forEach(r => { const w = r.order[0]; if (w && lastWinRace[w.id] === undefined) lastWinRace[w.id] = r.raceNum; });
   let drHorse = null, maxDr = 0;
   S.horses.forEach(h => {
     const last = lastWinRace[h.id];
-    const gap  = last !== undefined ? S.raceNum - last : S.raceNum;
+    const gap  = last !== undefined ? completedRaces - last : completedRaces;
     if (gap >= 5 && gap > maxDr) { maxDr = gap; drHorse = h; }
   });
   if (drHorse) out.push({ icon:'😴', title:'久未奪冠', horse: drHorse, desc:`已 ${maxDr} 場未奪冠` });
@@ -2290,6 +2422,16 @@ function getInsights() {
     if (c > maxT3) { maxT3 = c; t3Horse = h; }
   });
   if (t3Horse) out.push({ icon:'🎯', title:'前三常客', horse: t3Horse, desc:`近${Math.min(n,10)}場 ${maxT3}次前三` });
+
+  // 黃金馬幾場未現
+  const lastGoldenIdx = S.history.findIndex(r => r.specialType === 'GOLDEN');
+  const goldenGap = lastGoldenIdx === -1 ? S.history.length : lastGoldenIdx;
+  out.push({ icon:'✨', title:'黃金馬未現身', horse: null, numVal: goldenGap, numLabel:'場未現身', numColor:'#ffd700' });
+
+  // 黑金馬幾場未現
+  const lastBlackIdx = S.history.findIndex(r => r.specialType === 'BLACK');
+  const blackGap = lastBlackIdx === -1 ? S.history.length : lastBlackIdx;
+  out.push({ icon:'🖤', title:'黑金馬未現身', horse: null, numVal: blackGap, numLabel:'場未現身', numColor:'#aaaaff' });
 
   return out;
 }
@@ -2310,25 +2452,94 @@ function renderInsights() {
   wrap.innerHTML = insights.map(ins => {
     const h     = ins.horse;
     const color = h?.color || '#fff';
-    const name  = h?.name  || '—';
+    const name  = h?.name  || null;
     const silk  = h?.silk  || '🐴';
-    return `<div class="insight-card">
-      <div class="ic-left">
-        <div class="ic-icon">${ins.icon}</div>
+    const portraitHTML = h ? `
         <div class="ic-portrait-wrap">
           <img class="ic-portrait" src="./馬頭像/${name}.png" style="border-color:${color}"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="ic-portrait-fallback" style="background:${color}22;border-color:${color}">${silk}</div>
+        </div>` : '';
+    const horseNameHTML = name ? `<div class="ic-horse" style="color:${color}">${name}</div>` : '';
+    if (ins.numVal !== undefined) {
+      return `<div class="insight-card">
+        <div class="ic-left">
+          <div class="ic-icon">${ins.icon}</div>
         </div>
+        <div class="ic-right">
+          <div class="ic-title">${ins.title}</div>
+          <div class="ic-big-num" style="color:${ins.numColor}">${ins.numVal}</div>
+          <div class="ic-big-lbl">${ins.numLabel}</div>
+        </div>
+      </div>`;
+    }
+    return `<div class="insight-card" data-desc="${ins.desc}">
+      <div class="ic-left">
+        <div class="ic-icon">${ins.icon}</div>
+        ${portraitHTML}
       </div>
       <div class="ic-right">
         <div class="ic-title">${ins.title}</div>
-        <div class="ic-horse" style="color:${color}">${name}</div>
-        <div class="ic-desc">${ins.desc}</div>
+        ${horseNameHTML}
       </div>
     </div>`;
   }).join('');
+
+  // 事件委派：點擊 insight-card 顯示說明泡泡
+  wrap.addEventListener('click', onInsightCardClick);
 }
+
+let _icActiveCard = null;
+
+function onInsightCardClick(e) {
+  const card = e.target.closest('.insight-card[data-desc]');
+  const tt   = document.getElementById('ic-tooltip');
+  if (!tt) return;
+
+  // 點同一張：收起
+  if (_icActiveCard && _icActiveCard === card) {
+    hideInsightTooltip();
+    return;
+  }
+
+  if (!card) { hideInsightTooltip(); return; }
+
+  // 移除舊 active
+  document.querySelectorAll('.insight-card.ic-active').forEach(c => c.classList.remove('ic-active'));
+  card.classList.add('ic-active');
+  _icActiveCard = card;
+
+  tt.textContent = card.dataset.desc;
+  tt.classList.add('ic-tt-show');
+
+  // 定位：卡片正上方，水平置中
+  const rect = card.getBoundingClientRect();
+  const ttW  = 160;
+  let left   = rect.left + rect.width / 2 - ttW / 2;
+  left = Math.max(6, Math.min(left, window.innerWidth - ttW - 6));
+  const top  = rect.top - tt.offsetHeight - 10;
+  tt.style.left  = left + 'px';
+  // 先顯示取得高度再定位
+  requestAnimationFrame(() => {
+    const h  = tt.offsetHeight;
+    const t2 = rect.top - h - 10;
+    tt.style.top = (t2 < 6 ? rect.bottom + 10 : t2) + 'px';
+  });
+}
+
+function hideInsightTooltip() {
+  const tt = document.getElementById('ic-tooltip');
+  if (tt) tt.classList.remove('ic-tt-show');
+  document.querySelectorAll('.insight-card.ic-active').forEach(c => c.classList.remove('ic-active'));
+  _icActiveCard = null;
+}
+
+// 點擊其他區域關閉泡泡
+document.addEventListener('click', e => {
+  if (!e.target.closest('.insight-card') && !e.target.closest('#ic-tooltip')) {
+    hideInsightTooltip();
+  }
+});
 
 function renderChips() {
   const el = document.getElementById('bb-chips');
@@ -2505,6 +2716,7 @@ function beginRace() {
 
 function skipRace() {
   if (S.phase !== 'RACING' || !S.raceOrder) return;
+  _countdownGen++;  // 取消倒數（可能還在跑）
   if (raceAnimId) { cancelAnimationFrame(raceAnimId); raceAnimId = null; }
   if (camTimer)   { clearTimeout(camTimer); camTimer = null; }
   document.getElementById('race-countdown').classList.remove('cd-active');
@@ -2676,72 +2888,115 @@ function updateRankBar(ts) {
 // RACE SCRIPT SYSTEM
 // ════════════════════════════════════
 const SCRIPT_NAMES = {
-  1:'後來居上', 2:'終點焦灼', 3:'隨機演出', 4:'功虧一簣', 5:'一騎絕塵'
+  1:'終點焦灼', 2:'直線戰神', 3:'彎道戰神', 4:'功虧一簣', 5:'隨機演出', 6:'一騎絕塵'
+};
+
+// 小招：每段可觸發的技能池
+const MOVE_POOL = {
+  p1: ['強心劑','騎師鞭策'],
+  p2: ['彎道超車','追風步','覺醒'],
+  p3: ['後勁發力','血氣回充'],
+};
+
+// 大招：各劇本的觸發設定
+const BIG_MOVE_CFG = {
+  2: { name:'急速衝刺', sub:'冠軍下直道全速爆發！',  triggerPct: 65, chance: 0.40 },
+  3: { name:'燃燒意志', sub:'彎道奇兵燃燒最後意志！', triggerPct: 80, chance: 0.35 },
+  4: { name:'絕境反擊', sub:'千鈞一髮，逆轉乾坤！',  triggerPct: 85, chance: 0.20 },
 };
 
 function selectRaceScript() {
-  // 純機率抽劇本，與賠率結果無關
   const r = Math.random();
-  if (r < 0.15) return 1; // 後來居上  15%
-  if (r < 0.30) return 2; // 終點焦灼  15%
-  if (r < 0.65) return 3; // 隨機演出  35%
-  if (r < 0.80) return 4; // 功虧一簣  15%
-  return 5;                // 一騎絕塵  20%
+  if (r < 0.40) return 1; // 終點焦灼  40%
+  if (r < 0.60) return 2; // 直線戰神  20%
+  if (r < 0.72) return 3; // 彎道戰神  12%
+  if (r < 0.87) return 4; // 功虧一簣  15%
+  if (r < 0.95) return 5; // 隨機演出   8%
+  return 6;                // 一騎絕塵   5%
 }
 
 function buildSpeedProfiles(script, order) {
-  const p1 = {}, p2 = {};
+  const p1 = {}, p2 = {}, p3 = {};
   const rnd = (min, rng) => min + Math.random() * rng;
 
   switch (script) {
-    case 1: { // 後來居上：冠軍落後 → 後段大招超車
-      p1[order[0].pos] = rnd(0.80, 0.04);
-      [0.93,0.91,0.89,0.87,0.85,0.83].sort(()=>Math.random()-.5)
-        .forEach((v,i) => { p1[order[i+1].pos] = v; });
-      [1.40,0.88,0.82,0.76,0.71,0.66,0.62]
-        .forEach((v,i) => { p2[order[i].pos] = v * rnd(0.96,0.08); });
-      break;
-    }
-    case 2: { // 終點焦灼：前三名緊貼，幾乎同時衝線
-      [0.88,0.87,0.86].sort(()=>Math.random()-.5)
-        .forEach((v,i) => { p1[order[i].pos]   = v + rnd(0,0.02); });
-      [0.84,0.81,0.77,0.73].sort(()=>Math.random()-.5)
-        .forEach((v,i) => { p1[order[i+3].pos] = v + rnd(0,0.02); });
-      [1.18,1.12,1.07]
-        .forEach((v,i) => { p2[order[i].pos]   = v * rnd(0.98,0.04); });
+    case 1: { // 終點焦灼：前3名三段緊貼，下直道才分出毫釐
+      [0.90,0.89,0.88].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p1[order[i].pos] = v + rnd(0,0.02); });
+      [0.84,0.81,0.78,0.74].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p1[order[i+3].pos] = v; });
+      [0.91,0.90,0.89].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p2[order[i].pos] = v + rnd(0,0.02); });
+      [0.82,0.79,0.75,0.71].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p2[order[i+3].pos] = v; });
+      [1.18,1.14,1.10]
+        .forEach((v,i) => { p3[order[i].pos] = v * rnd(0.98,0.03); });
       [0.76,0.71,0.66,0.62]
-        .forEach((v,i) => { p2[order[i+3].pos] = v * rnd(0.96,0.08); });
+        .forEach((v,i) => { p3[order[i+3].pos] = v * rnd(0.96,0.06); });
       break;
     }
-    case 3: { // 隨機演出：完全隨機，無任何劇本結構
+    case 2: { // 直線戰神：冠軍前兩段落後，下直道急速爆發超車
+      p1[order[0].pos] = rnd(0.76, 0.06); // 上直道：慢
+      p2[order[0].pos] = rnd(0.78, 0.06); // 彎道：持續落後
+      p3[order[0].pos] = rnd(1.45, 0.10); // 下直道：爆發
+      [0.91,0.89,0.87,0.85,0.83,0.81].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p1[order[i+1].pos] = v; });
+      [0.89,0.87,0.84,0.81,0.78,0.75].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p2[order[i+1].pos] = v; });
+      [0.88,0.82,0.76,0.71,0.66,0.62]
+        .forEach((v,i) => { p3[order[i+1].pos] = v * rnd(0.96,0.08); });
+      break;
+    }
+    case 3: { // 彎道戰神：冠軍彎道爆發超車，下直道驚險守住
+      p1[order[0].pos] = rnd(0.76, 0.06); // 上直道：落後
+      p2[order[0].pos] = rnd(1.02, 0.08); // 彎道：大爆發
+      p3[order[0].pos] = rnd(0.90, 0.06); // 下直道：略降速
+      [0.91,0.89,0.87,0.85,0.83,0.81].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p1[order[i+1].pos] = v; });
+      [0.80,0.77,0.74,0.71,0.68,0.65].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p2[order[i+1].pos] = v; }); // 彎道其他馬慢
+      p3[order[1].pos] = rnd(0.92, 0.06); // 亞軍後段追趕
+      [0.86,0.80,0.74,0.68,0.62]
+        .forEach((v,i) => { p3[order[i+2].pos] = v * rnd(0.96,0.08); });
+      break;
+    }
+    case 4: { // 功虧一簣：亞軍前兩段領跑，冠軍下直道才絕境反超
+      p1[order[0].pos] = rnd(0.84, 0.03);
+      p1[order[1].pos] = rnd(0.93, 0.03); // 亞軍上直道最快
+      [0.88,0.85,0.81,0.77,0.73].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p1[order[i+2].pos] = v; });
+      p2[order[0].pos] = rnd(0.88, 0.04);
+      p2[order[1].pos] = rnd(0.94, 0.03); // 彎道亞軍仍領
+      [0.86,0.82,0.78,0.74,0.70].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p2[order[i+2].pos] = v; });
+      p3[order[0].pos] = rnd(1.52, 0.06); // 下直道冠軍爆發
+      p3[order[1].pos] = rnd(1.14, 0.05); // 亞軍也快但差一截
+      [0.82,0.76,0.70,0.65,0.60]
+        .forEach((v,i) => { p3[order[i+2].pos] = v * rnd(0.96,0.08); });
+      break;
+    }
+    case 5: { // 隨機演出：三段完全亂數
       order.forEach(h => {
-        p1[h.pos] = rnd(0.75, 0.30); // 0.75–1.05，每匹獨立亂數
+        p1[h.pos] = rnd(0.75, 0.30);
         p2[h.pos] = rnd(0.75, 0.30);
+        p3[h.pos] = rnd(0.75, 0.30);
       });
       break;
     }
-    case 4: { // 功虧一簣：亞軍領跑 → 冠軍最後一刻反超
-      p1[order[0].pos] = rnd(0.84, 0.03);
-      p1[order[1].pos] = rnd(0.90, 0.03);
-      [0.87,0.84,0.80,0.76,0.72].sort(()=>Math.random()-.5)
-        .forEach((v,i) => { p1[order[i+2].pos] = v; });
-      p2[order[0].pos] = rnd(1.50, 0.06);
-      p2[order[1].pos] = rnd(1.28, 0.05);
-      [0.82,0.76,0.70,0.65,0.60]
-        .forEach((v,i) => { p2[order[i+2].pos] = v * rnd(0.96,0.08); });
-      break;
-    }
-    case 5: { // 一騎絕塵：冠軍全程領跑，無人追上
-      p1[order[0].pos] = rnd(1.06, 0.04);
+    case 6: { // 一騎絕塵：冠軍三段全程壓制，無懸念
+      p1[order[0].pos] = rnd(1.08, 0.04);
       [0.88,0.85,0.82,0.78,0.74,0.70].sort(()=>Math.random()-.5)
         .forEach((v,i) => { p1[order[i+1].pos] = v; });
-      p2[order[0].pos] = rnd(1.12, 0.06);
-      [1.05,0.96,0.87,0.78,0.71,0.64]
-        .forEach((v,i) => { p2[order[i+1].pos] = v * rnd(0.96,0.08); });
+      p2[order[0].pos] = rnd(1.06, 0.04);
+      [0.86,0.82,0.78,0.74,0.70,0.66].sort(()=>Math.random()-.5)
+        .forEach((v,i) => { p2[order[i+1].pos] = v; });
+      p3[order[0].pos] = rnd(1.14, 0.06);
+      [1.02,0.94,0.86,0.78,0.71,0.64]
+        .forEach((v,i) => { p3[order[i+1].pos] = v * rnd(0.96,0.08); });
       break;
     }
   }
-  return { p1, p2 };
+  return { p1, p2, p3 };
 }
 
 // ════════════════════════════════════
@@ -2767,19 +3022,16 @@ function getTrackGeom() {
 }
 
 function getHorsePos(progress, laneIdx, g) {
-  const d       = Math.max(0, Math.min(1, progress)) * g.L_total;
-  const ri      = g.midY - g.topY - laneIdx * g.laneH;   // 此道半徑
-  const laneArc = Math.PI * ri;                           // 此道真實弧長（各道不同）
+  const d  = Math.max(0, Math.min(1, progress)) * g.L_total;
+  const ri = g.midY - g.topY - laneIdx * g.laneH;
   if (d <= g.L_top) {
-    // 上直道：左→右
     return { x: g.leftX + d, y: g.topY + laneIdx * g.laneH, angle: 0 };
-  } else if (d <= g.L_top + laneArc) {
-    // 右彎：用各道自己的弧長計算 theta，速度在直道/弧道間一致
-    const theta = Math.PI * (d - g.L_top) / laneArc;
+  } else if (d <= g.L_top + g.L_semi) {
+    // 彎道統一用 L_semi（參考弧長），所有道次同步進出彎道，避免漂移時位置跳躍
+    const theta = Math.PI * (d - g.L_top) / g.L_semi;
     return { x: g.bendX + ri * Math.sin(theta), y: g.midY - ri * Math.cos(theta), angle: theta };
   } else {
-    // 下直道：右→左
-    return { x: g.bendX - (d - g.L_top - laneArc), y: g.midY + ri, angle: Math.PI };
+    return { x: g.bendX - (d - g.L_top - g.L_semi), y: g.midY + ri, angle: Math.PI };
   }
 }
 
@@ -3024,6 +3276,7 @@ function drawRaceFrame(ts) {
   drawTrack(raceCtx, geom);
   drawHorses(raceCtx, geom, Math.floor(ts / 80) % 6, ts);
   drawSpecialParticles(raceCtx);
+  drawSmallMoveFloaters(raceCtx);
 
   raceCtx.restore();
 }
@@ -3043,7 +3296,7 @@ function startRace() {
 
   const overlay = document.getElementById('race-overlay');
   document.getElementById('result-backdrop').classList.remove('active');
-  document.getElementById('ro-phase-lbl').textContent = '🏇 準備起跑！';
+  // ro-phase-lbl removed
   overlay.classList.add('active');
 
   buildRaceBackground();
@@ -3052,13 +3305,24 @@ function startRace() {
 
   // ── 預先模擬（結果已定，存入 S.raceOrder 供跳過使用）──
   const order = simulateRace(S.horses);
-  order.forEach((h, i) => h.finalPos = i + 1);   // 特殊馬不強制名次，自然結果
+  // QA 作弊：強制特殊馬第一名
+  if (S.specialHorse) {
+    const forceFirst = (S.specialType === 'GOLDEN' && S.forceGoldenFirst) ||
+                       (S.specialType === 'BLACK'  && S.forceBlackFirst);
+    if (forceFirst) {
+      const idx = order.findIndex(h => h.pos === S.specialHorse.pos);
+      if (idx > 0) order.unshift(order.splice(idx, 1)[0]);
+    }
+  }
+  order.forEach((h, i) => h.finalPos = i + 1);
   S.raceOrder = order;
-  // 劇本系統：依賠率條件選劇本，建立速度配置
-  const PHASE_SWITCH = 55;
-  const PHASE_TRANS  = 6;
+  // 劇本系統：3 段速度（上直道 / 右彎 / 下直道）
+  const PHASE1_END  = 35;  // 上直道結束 %
+  const PHASE2_END  = 65;  // 彎道結束 %
+  const PHASE_TRANS = 3;   // 段間過渡寬度 %
   const phase1Speeds = {};
   const phase2Speeds = {};
+  const phase3Speeds = {};
 
   // 特殊馬：中途現身時間（進度 18-42%）
   S.specialRevealed   = false;
@@ -3066,15 +3330,36 @@ function startRace() {
   specialParticles    = [];
 
   S.raceScript = selectRaceScript();
-  const { p1: sp1, p2: sp2 } = buildSpeedProfiles(S.raceScript, order);
+  const { p1: sp1, p2: sp2, p3: sp3 } = buildSpeedProfiles(S.raceScript, order);
   Object.assign(phase1Speeds, sp1);
   Object.assign(phase2Speeds, sp2);
+  Object.assign(phase3Speeds, sp3);
 
-  // 特殊馬場次：覆蓋速度，確保視覺衝線順序與預定名次一致
+  // ── 大招預計算 ──
+  const bigMoveCfg        = BIG_MOVE_CFG[S.raceScript] || null;
+  const bigMoveShouldFire = bigMoveCfg ? (Math.random() < bigMoveCfg.chance) : false;
+  let   bigMoveFired      = false;
+  _dbgBigMove = { cfg: bigMoveCfg, shouldFire: bigMoveShouldFire, fired: false };
+
+  // ── 小招預計算（每匹馬每段最多觸發1次）──
+  smallMoveFloaters = [];
+  const p3MoveChance  = bigMoveShouldFire ? 0.15 : 0.35;
+  const smallMovePlan = {};
+  _dbgSmallPlan = smallMovePlan;
+  S.horses.forEach(h => {
+    const pick = pool => pool[Math.floor(Math.random() * pool.length)];
+    smallMovePlan[h.pos] = {
+      p1: Math.random() < 0.40 ? { at: 10 + Math.random() * 20, name: pick(MOVE_POOL.p1), fired: false } : null,
+      p2: Math.random() < 0.40 ? { at: 40 + Math.random() * 20, name: pick(MOVE_POOL.p2), fired: false } : null,
+      p3: Math.random() < p3MoveChance ? { at: 68 + Math.random() * 12, name: pick(MOVE_POOL.p3), fired: false } : null,
+    };
+  });
+
+  // 特殊馬場次：後段絕對最快，確保視覺衝線正確
   if (S.specialHorse) {
-    const allP2 = Object.values(phase2Speeds);
-    const maxP2 = Math.max(...allP2);
-    phase2Speeds[order[0].pos] = maxP2 + 0.30;       // 第一名絕對最快
+    const maxP3 = Math.max(...Object.values(phase3Speeds));
+    phase3Speeds[order[0].pos] = maxP3 + 0.30;
+    phase2Speeds[order[0].pos] = Math.max(phase2Speeds[order[0].pos] || 0.85, 0.88);
     phase1Speeds[order[0].pos] = Math.max(phase1Speeds[order[0].pos] || 0.85, 0.88);
   }
 
@@ -3101,11 +3386,9 @@ function startRace() {
 
   // ── 3-2-1-GO! 倒數，完成後才啟動跑馬動畫 ──
   showCountdown(() => {
-    document.getElementById('ro-phase-lbl').textContent = '🏇 比賽開始！';
+    // ro-phase-lbl removed
 
-    // 技能（落後馬在比賽中段觸發）
-    const T3 = CFG.RACE_DUR + CFG.RACE_DUR * 0.4;
-    scheduleSkills(order, T3);
+    // scheduleSkills 已由新大招/小招系統取代，停用舊 DOM bubble 觸發
 
     // ── rAF 跑馬主迴圈 ──
     if (raceAnimId) cancelAnimationFrame(raceAnimId);
@@ -3127,13 +3410,18 @@ function startRace() {
         if (done[h.pos]) return;
         const pos = racePositions[h.pos];
         let spd;
-        if (pos < PHASE_SWITCH) {
+        if (pos < PHASE1_END) {
           spd = phase1Speeds[h.pos];
-        } else if (pos < PHASE_SWITCH + PHASE_TRANS) {
-          const t = (pos - PHASE_SWITCH) / PHASE_TRANS;
+        } else if (pos < PHASE1_END + PHASE_TRANS) {
+          const t = (pos - PHASE1_END) / PHASE_TRANS;
           spd = phase1Speeds[h.pos] * (1 - t) + phase2Speeds[h.pos] * t;
-        } else {
+        } else if (pos < PHASE2_END) {
           spd = phase2Speeds[h.pos];
+        } else if (pos < PHASE2_END + PHASE_TRANS) {
+          const t = (pos - PHASE2_END) / PHASE_TRANS;
+          spd = phase2Speeds[h.pos] * (1 - t) + phase3Speeds[h.pos] * t;
+        } else {
+          spd = phase3Speeds[h.pos];
         }
         const delta = spd * (RACE_FINISH_PCT - RACE_START_PCT) / CFG.RACE_DUR * dt * (S.turbo ? 2 : 1);
         racePositions[h.pos] = Math.min(racePositions[h.pos] + delta, OFFSCREEN_PCT);
@@ -3172,6 +3460,33 @@ function startRace() {
         horseLaneY[h.pos]  = Math.max(0.1, Math.min(5.9, horseLaneY[h.pos]));
       });
 
+      // ── 大招觸發 ──
+      if (!bigMoveFired && bigMoveShouldFire && bigMoveCfg) {
+        const winnerPos = racePositions[order[0].pos];
+        if (winnerPos >= bigMoveCfg.triggerPct) {
+          bigMoveFired = true;
+          if (_dbgBigMove) _dbgBigMove.fired = true;
+          triggerBigMove(bigMoveCfg);
+        }
+      }
+
+      // ── 小招觸發 ──
+      S.horses.forEach(h => {
+        if (done[h.pos]) return;
+        const pos  = racePositions[h.pos];
+        const plan = smallMovePlan[h.pos];
+        const geom = getTrackGeom();
+        if (!geom) return;
+        ['p1','p2','p3'].forEach(seg => {
+          const m = plan[seg];
+          if (!m || m.fired || pos < m.at) return;
+          m.fired = true;
+          const prog = Math.max(0, Math.min(1, (pos - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT)));
+          const { x, y } = getHorsePos(prog, horseLaneY[h.pos] ?? 3, geom);
+          smallMoveFloaters.push({ x, y, text: m.name, startTime: performance.now(), duration: 1800, rise: geom.laneH * 2.5, fontSize: Math.max(10, Math.round(geom.laneH * 0.9)) });
+        });
+      });
+
       // 特殊馬：進度到達閾值時中途現身
       if (S.specialHorse && !S.specialRevealed) {
         const prog = Math.max(0, (racePositions[S.specialHorse.pos] - RACE_START_PCT) / (RACE_FINISH_PCT - RACE_START_PCT));
@@ -3198,19 +3513,18 @@ function startRace() {
 function showCountdown(onComplete) {
   const el  = document.getElementById('race-countdown');
   const seq = [3, 2, 1, 'GO!'];
-  // 圓周 = 2π × r(52) ≈ 327
-  const CIRCUM = 327;
+  const myGen = ++_countdownGen;  // 每次呼叫產生新世代，舊的 timeout 自動失效
   let i = 0;
   el.classList.add('cd-active');
 
   function tick() {
+    if (_countdownGen !== myGen) return; // 已被新的倒數或 nextRace 取代，放棄
     const val  = seq[i];
     const isGo = val === 'GO!';
 
     if (isGo) {
       el.innerHTML = `<span class="cd-go">GO!</span>`;
     } else {
-      // 每次重建 DOM 讓 SVG animation 從頭播放
       el.innerHTML = `
         <div class="cd-wrapper">
           <svg class="cd-ring-svg" viewBox="0 0 120 120">
@@ -3226,6 +3540,7 @@ function showCountdown(onComplete) {
       setTimeout(tick, isGo ? 650 : 950);
     } else {
       setTimeout(() => {
+        if (_countdownGen !== myGen) return;
         el.classList.remove('cd-active');
         onComplete();
       }, 650);
@@ -3281,7 +3596,7 @@ function onRaceEnd(order) {
     const {totalWin, results} = calcPayout(S.bets, S.horses);
     S.result = {totalWin, results, order};
     if (totalWin>0) S.balance += totalWin;
-    S.history.unshift({ raceNum:S.raceNum, order:[...order], winnerWinOdds:order[0].winOdds });
+    S.history.unshift({ raceNum:S.raceNum, order:[...order], winnerWinOdds:order[0].winOdds, specialType: S.specialType || null });
     if (S.history.length>50) S.history.pop();
     saveMachineData();
     updateBal();
@@ -3348,7 +3663,7 @@ function onRaceEnd(order) {
     netEl.textContent = (net>=0?'+':'')+net.toLocaleString();
     netEl.style.color = net>0?'var(--color-win)':net<0?'var(--color-lose)':'var(--text-sub)';
 
-    document.getElementById('ro-phase-lbl').textContent='🏁 比賽結束';
+    // ro-phase-lbl removed
     document.getElementById('result-backdrop').classList.add('active');
     markResultCells();
   }, 600);
@@ -3361,6 +3676,7 @@ function onRaceEnd(order) {
 let _settleMode = null; // 'settle' | 'warn'
 
 function nextRace() {
+  _countdownGen++;  // 取消任何進行中的倒數
   if (raceAnimId) { cancelAnimationFrame(raceAnimId); raceAnimId = null; }
   if (camTimer)   { clearTimeout(camTimer); camTimer = null; }
   if (raceCanvasEl) raceCanvasEl.style.display = 'none';
@@ -3377,7 +3693,7 @@ function nextRace() {
 
   if (specialInTop3) {
     // 特殊馬入前三：先閃特殊格（賠率提升展示），再閃中獎格
-    setTimeout(() => flashSpecialCells(), BASE_DELAY);
+    setTimeout(() => { flashSpecialCells(); refreshSpecialOdds(); }, BASE_DELAY);
     if (hasWin) {
       setTimeout(() => flashWinCells(savedResult),    BASE_DELAY + SPECIAL_DUR);
       setTimeout(() => showSettleDialog(savedResult), BASE_DELAY + SPECIAL_DUR + FLASH_DUR + 150);
@@ -3417,10 +3733,80 @@ function flashWinCells(result) {
   });
 }
 
+// ── 大招 / 小招系統 ──
+
+let smallMoveFloaters = []; // { x, y, text, startTime, duration }
+let _dbgBigMove   = null;  // { cfg, shouldFire, fired } — debug 用
+let _dbgSmallPlan = null;  // smallMovePlan ref — debug 用
+let _countdownGen = 0;     // 每次 showCountdown 遞增，防止舊 timeout 殘留觸發
+
+function triggerBigMove(cfg) {
+  document.getElementById('bm-name').textContent = cfg.name;
+  document.getElementById('bm-sub').textContent  = cfg.sub;
+  const overlay = document.getElementById('big-move-overlay');
+  overlay.classList.add('active');
+  setTimeout(() => overlay.classList.remove('active'), 3000);
+}
+
+function drawSmallMoveFloaters(ctx) {
+  const now = performance.now();
+  smallMoveFloaters = smallMoveFloaters.filter(f => {
+    const t = (now - f.startTime) / f.duration;
+    if (t >= 1) return false;
+    const alpha = t < 0.15 ? t / 0.15 : t > 0.65 ? 1 - (t - 0.65) / 0.35 : 1;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font        = `bold ${f.fontSize}px sans-serif`;
+    ctx.fillStyle   = '#ffe066';
+    ctx.strokeStyle = 'rgba(0,0,0,.6)';
+    ctx.lineWidth   = 3;
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    const floatY = f.y - f.rise * t;
+    ctx.strokeText(f.text, f.x, floatY);
+    ctx.fillText(f.text, f.x, floatY);
+    ctx.restore();
+    return true;
+  });
+}
+
 // ── 特殊馬中途現身系統 ──
+
+function refreshSpecialOdds() {
+  if (!S.specialHorse) return;
+  const h = S.specialHorse;
+  [
+    { type: 'WIN',   finalOdds: h.specialOdds },
+    { type: 'PLACE', finalOdds: h.specialPlaceOdds },
+  ].forEach(({ type, finalOdds }) => {
+    const cell = document.querySelector(`[data-type="${type}"][data-pos="${h.pos}"]`);
+    if (!cell) return;
+
+    // ── 第二段：賠率 ticker ──
+    const oddsEl = cell.querySelector('.bci-odds') || cell.querySelector('.hr-odds');
+    if (oddsEl) {
+      const baseVal = parseFloat(oddsEl.textContent) || finalOdds;
+      let tick = 0;
+      const TICKS = 14;
+      function doTick() {
+        tick++;
+        if (tick >= TICKS) {
+          oddsEl.textContent = finalOdds + 'x';
+          oddsEl.classList.add('odds-refreshed');
+        } else {
+          const rand = +(baseVal + Math.random() * (finalOdds - baseVal)).toFixed(1);
+          oddsEl.textContent = rand + 'x';
+          setTimeout(doTick, 75);
+        }
+      }
+      doTick();
+    }
+  });
+}
 
 function triggerSpecialMidReveal() {
   flashSpecialCells();
+  refreshSpecialOdds();
   const banner  = document.getElementById('special-mid-banner');
   const isBlack = S.specialType === 'BLACK';
   const icon    = isBlack ? '♚' : '★';
@@ -3499,26 +3885,40 @@ function drawSpecialParticles(ctx) {
 // 結算瞬間：頭像格標示前三名 + 特殊馬
 function markResultCells() {
   if (!S.raceOrder) return;
-  const medals  = ['🥇','🥈','🥉'];
-  const top3Pos = new Set(S.raceOrder.slice(0, 3).map(h => h.pos));
+  const medals      = ['🥇','🥈','🥉'];
+  const rankColors  = ['#ffd700','#c0c0c0','#cd7f32'];
+  const specialPos  = S.specialHorse ? S.specialHorse.pos : null;
+  const top3Pos     = new Set(S.raceOrder.slice(0, 3).map(h => h.pos));
 
-  // 前三名：頭像格加框 + 右上角獎牌
   S.raceOrder.slice(0, 3).forEach((h, i) => {
     const cell = document.querySelector(`.tl-img-cell[data-pos="${h.pos}"]`);
     if (!cell) return;
-    cell.classList.add(`result-rank-${i + 1}`);
-    const badge = document.createElement('span');
-    badge.className = 'result-rank-badge';
-    badge.textContent = medals[i];
-    cell.appendChild(badge);
+    if (h.pos === specialPos) {
+      // 特殊馬入前三：維持頭像 + 亮框，只加角標
+      cell.classList.add(`result-rank-${i + 1}`);
+      const badge = document.createElement('span');
+      badge.className = 'result-rank-badge';
+      badge.textContent = medals[i];
+      cell.appendChild(badge);
+    } else {
+      // 一般馬：編號旁加大 icon，保留頭像
+      cell.innerHTML = `
+        <div style="display:flex;align-items:center;gap:clamp(2px,.35vw,5px);">
+          <div class="tl-num-badge" style="color:${h.color};border-color:${h.color}">${h.pos}</div>
+          <span style="font-size:clamp(14px,2.2vw,28px);line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7))">${medals[i]}</span>
+        </div>
+        <img class="tl-portrait" src="./馬頭像/${h.name}.png"
+             style="border-color:${h.color};"
+             onerror="imgFallback(this,'${h.silk}','${h.name}','false')">`;
+    }
   });
 
   // 特殊馬（未入前三）：頭像格加特殊馬圖示
-  if (S.specialHorse && !top3Pos.has(S.specialHorse.pos)) {
+  if (S.specialHorse && !top3Pos.has(specialPos)) {
     const isBlack = S.specialType === 'BLACK';
     const icon    = isBlack ? '♚' : '★';
     const color   = isBlack ? '#aac0ff' : '#ffd700';
-    const cell    = document.querySelector(`.tl-img-cell[data-pos="${S.specialHorse.pos}"]`);
+    const cell    = document.querySelector(`.tl-img-cell[data-pos="${specialPos}"]`);
     if (cell) {
       cell.style.boxShadow = `inset 0 0 0 2px ${color}`;
       const badge = document.createElement('span');
@@ -3575,6 +3975,7 @@ function spawnCoins(boxEl) {
 
 // 顯示結算 Dialog（三種）
 function showSettleDialog(result) {
+  if (S.phase !== 'RESULT') return; // 防止 timeout 殘留在非結算階段觸發
   const overlay = document.getElementById('settle-overlay');
   const box     = document.getElementById('settle-box');
   const iconEl  = document.getElementById('sd-icon');
@@ -3851,28 +4252,58 @@ function renderDbg() {
     <div style="color:var(--accent-gold);font-weight:700;margin-bottom:4px;">🛠 DEBUG</div>
     <div>Phase: <b>${S.phase}</b> | Race: #${S.raceNum}</div>
     <div>Balance: $${S.balance} | Bets: ${S.bets.length}</div>
-    <div>特殊馬: ${S.specialHorse ? (S.specialType==='BLACK'?'黑金馬':'黃金馬')+' 馬 #'+S.specialHorse.pos+' ('+S.specialHorse.specialOdds+'x '+S.specialHorse.specialMult+'x倍率)' : '無'}</div>
+    <div>特殊馬: ${S.specialHorse ? (S.specialType==='BLACK'?'黑金馬':'黃金馬')+' 馬 #'+S.specialHorse.pos+' 獨贏'+S.specialHorse.specialWinMult+'x／位置'+S.specialHorse.specialPlaceMult+'x → WIN:'+S.specialHorse.specialOdds+'x PLACE:'+S.specialHorse.specialPlaceOdds+'x' : '無'}</div>
     <div>劇本: ${S.raceScript ? S.raceScript+' '+SCRIPT_NAMES[S.raceScript] : '—'}</div>
+    <div style="margin-top:3px;">大招: ${(() => {
+      if (!_dbgBigMove || !_dbgBigMove.cfg) return '<span style="color:#555">無</span>';
+      const d = _dbgBigMove;
+      if (!d.shouldFire) return `<span style="color:#555">${d.cfg.name}（本場不觸發）</span>`;
+      const status = d.fired ? '<span style="color:#e080ff">✔ 已觸發</span>' : `<span style="color:#cc88ff">待觸發 @${d.cfg.triggerPct}%</span>`;
+      return `<b style="color:#e080ff">${d.cfg.name}</b> ${status}`;
+    })()}</div>
+    <div style="margin-top:3px;color:#888;font-size:9px;">小招：${(() => {
+      if (!_dbgSmallPlan) return '—';
+      const rows = S.horses.map(h => {
+        const p = _dbgSmallPlan[h.pos];
+        if (!p) return '';
+        const segs = ['p1','p2','p3'].map(s => {
+          const m = p[s];
+          if (!m) return null;
+          const st = m.fired ? `<span style="color:#2AC98C">✔${m.name}</span>` : `<span style="color:#aaa">${m.name}@${Math.round(m.at)}%</span>`;
+          return st;
+        }).filter(Boolean);
+        return segs.length ? `#${h.pos}:${segs.join(' ')}` : '';
+      }).filter(Boolean);
+      return rows.join('  ') || '（無小招）';
+    })()}</div>
     <label style="cursor:pointer;display:block;margin-top:4px;">
       <input type="checkbox" ${S.forceGoldenHorse?'checked':''} onchange="S.forceGoldenHorse=this.checked;renderDbg();">
       強制黃金馬
     </label>
-    <label style="cursor:pointer;display:block;margin-top:2px;">
+    <label style="cursor:pointer;display:block;margin-top:2px;padding-left:10px;color:#ffdd88;">
+      <input type="checkbox" ${S.forceGoldenFirst?'checked':''} onchange="S.forceGoldenFirst=this.checked;renderDbg();">
+      └ 黃金馬必定第一
+    </label>
+    <label style="cursor:pointer;display:block;margin-top:4px;">
       <input type="checkbox" ${S.forceBlackHorse?'checked':''} onchange="S.forceBlackHorse=this.checked;renderDbg();">
       強制黑金馬
+    </label>
+    <label style="cursor:pointer;display:block;margin-top:2px;padding-left:10px;color:#aaaaff;">
+      <input type="checkbox" ${S.forceBlackFirst?'checked':''} onchange="S.forceBlackFirst=this.checked;renderDbg();">
+      └ 黑金馬必定第一
     </label>
     <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
       <button onclick="nextRace()" style="background:#333;border:1px solid #555;color:#ccc;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">跳下一場</button>
       <button onclick="S.balance=10000;updateBal();renderDbg();" style="background:#333;border:1px solid #555;color:#ccc;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">補充籌碼</button>
     </div>
-    <div style="margin-top:4px;color:#555;font-size:9px;">雙擊畫面顯示/隱藏</div>`;
+    `;
 }
 
-document.addEventListener('dblclick',()=>{
-  const p=document.getElementById('dbg');
-  if (p.style.display==='none'){p.style.display='block';renderDbg();}
-  else p.style.display='none';
-});
+function toggleDbg() {
+  const p = document.getElementById('dbg');
+  if (p.style.display === 'none') { p.style.display = 'block'; renderDbg(); }
+  else p.style.display = 'none';
+}
 
 // ════════════════════════════════════
 // INIT
@@ -3886,6 +4317,11 @@ function initRace() {
   S.specialHorse = null; S.specialType = null;
   S.specialRevealed = false; S.specialRevealPct = 2;
   specialParticles = [];
+  smallMoveFloaters = [];
+  // 清除特殊馬 banner 與揭曉 overlay（避免帶入下一場）
+  const _smb = document.getElementById('special-mid-banner');
+  if (_smb) { _smb.className = ''; _smb.innerHTML = ''; }
+  document.getElementById('special-reveal-overlay')?.classList.remove('active');
   updateBal();
   renderAll();
   document.getElementById('btn-start').disabled = false;
@@ -3909,6 +4345,9 @@ initRace();
 })();
 </script>
 
+<!-- DEBUG 開關按鈕 -->
+<button id="dbg-toggle" onclick="toggleDbg()" title="Debug">🛠</button>
+
 <!-- 特殊馬中途現身 Banner -->
 <div id="special-mid-banner"></div>
 
@@ -3922,6 +4361,17 @@ initRace();
     <div class="sr-odds"  id="sr-odds"></div>
     <div class="sr-sub"   id="sr-sub"></div>
     <div class="sr-hint">點擊任意處繼續</div>
+  </div>
+</div>
+
+<!-- 大招 Dialog -->
+<div id="ic-tooltip"></div>
+
+<div id="big-move-overlay">
+  <div id="big-move-box">
+    <div id="bm-icon">⚡</div>
+    <div id="bm-name"></div>
+    <div id="bm-sub"></div>
   </div>
 </div>
 

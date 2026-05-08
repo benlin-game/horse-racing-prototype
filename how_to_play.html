@@ -126,22 +126,24 @@
     }
 
     /* ── FLOW STEPS ── */
-    .flow {
+    .flow-layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: 1fr minmax(140px, 190px);
+      gap: 12px;
+      align-items: stretch;
+    }
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
     .flow-step {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 20px 16px;
+      padding: 18px 14px 16px;
       text-align: center;
       position: relative;
-    }
-    .flow-step.special-step {
-      border-color: rgba(255,215,0,.35);
-      background: linear-gradient(160deg, rgba(255,215,0,.05) 0%, var(--card) 60%);
     }
     .flow-step-num {
       position: absolute;
@@ -155,10 +157,68 @@
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
     }
-    .flow-step.special-step .flow-step-num { background: var(--gold-bright); }
-    .flow-step-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-    .flow-step-label { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .flow-step-desc  { font-size: 12px; color: var(--text-sub); line-height: 1.6; }
+    .flow-step-icon { font-size: 26px; margin-bottom: 8px; display: block; }
+    .flow-step-label { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+    .flow-step-desc  { font-size: 11px; color: var(--text-sub); line-height: 1.6; }
+
+    /* ── 特殊馬現身卡（右側） ── */
+    .flow-special-card {
+      background: linear-gradient(160deg, rgba(255,215,0,.07) 0%, var(--card) 65%);
+      border: 1px solid rgba(201,162,39,.45);
+      border-radius: 10px;
+      padding: 24px 16px 20px;
+      text-align: center;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .fsc-star {
+      position: absolute;
+      top: -11px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--gold-bright);
+      color: #000;
+      font-size: 12px;
+      font-weight: 900;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .fsc-horses {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .fsc-horse {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .fsc-horse.golden {
+      background: rgba(255,215,0,.12);
+      border: 2px solid rgba(255,215,0,.65);
+      box-shadow: 0 0 12px rgba(255,215,0,.3);
+    }
+    .fsc-horse.black {
+      background: rgba(130,130,255,.12);
+      border: 2px solid rgba(130,130,255,.55);
+      box-shadow: 0 0 12px rgba(130,130,255,.25);
+    }
+    .fsc-label {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--gold-bright);
+      letter-spacing: .04em;
+    }
+    .fsc-desc {
+      font-size: 11px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
 
     /* ── BET CARDS ── */
     .bet-cards {
@@ -394,37 +454,47 @@
   <!-- ── PAGE 1：遊戲流程 ── -->
   <div class="page active" id="page-1">
     <div class="section-title">遊戲流程</div>
-    <div class="flow">
-      <div class="flow-step">
-        <div class="flow-step-num">1</div>
-        <span class="flow-step-icon">🎫</span>
-        <div class="flow-step-label">選馬下注</div>
-        <div class="flow-step-desc">選好馬匹與注單類型，點擊格子即刻下注，可同時下多張注單</div>
+    <div class="flow-layout">
+
+      <!-- 左：2×2 流程格 -->
+      <div class="flow-grid">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <span class="flow-step-icon">🎫</span>
+          <div class="flow-step-label">選馬下注</div>
+          <div class="flow-step-desc">選好馬匹與注單類型，點擊格子即刻下注，可同時下多張注單</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <span class="flow-step-icon">3️⃣</span>
+          <div class="flow-step-label">按下開賽</div>
+          <div class="flow-step-desc">按「開賽」後進入倒數，比賽立即展開</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <span class="flow-step-icon">🏟️</span>
+          <div class="flow-step-label">觀賽</div>
+          <div class="flow-step-desc">3—2—1—GO！即時排名欄同步更新，緊張衝刺一幕不漏</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <span class="flow-step-icon">🏁</span>
+          <div class="flow-step-label">結算派彩</div>
+          <div class="flow-step-desc">7 匹馬衝線後顯示前三名成績，中獎格閃爍提示，派彩即時入帳</div>
+        </div>
       </div>
-      <div class="flow-step">
-        <div class="flow-step-num">2</div>
-        <span class="flow-step-icon">3️⃣</span>
-        <div class="flow-step-label">按下開賽</div>
-        <div class="flow-step-desc">按「開賽」後進入倒數，比賽立即展開</div>
+
+      <!-- 右：特殊馬現身卡 -->
+      <div class="flow-special-card">
+        <div class="fsc-star">★</div>
+        <div class="fsc-horses">
+          <div class="fsc-horse golden">🏇</div>
+          <div class="fsc-horse black">🏇</div>
+        </div>
+        <div class="fsc-label">特殊馬現身</div>
+        <div class="fsc-desc">若觸發黃金馬 / 黑金馬，中途顯示現身 Banner，賠率自動升級</div>
       </div>
-      <div class="flow-step special-step">
-        <div class="flow-step-num">★</div>
-        <span class="flow-step-icon">✨</span>
-        <div class="flow-step-label">特殊馬現身</div>
-        <div class="flow-step-desc">若觸發黃金馬 / 黑金馬，中途顯示現身 Banner，賠率自動升級</div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-step-num">3</div>
-        <span class="flow-step-icon">🏟️</span>
-        <div class="flow-step-label">觀賽</div>
-        <div class="flow-step-desc">3—2—1—GO！即時排名欄同步更新，緊張衝刺一幕不漏</div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-step-num">4</div>
-        <span class="flow-step-icon">🏁</span>
-        <div class="flow-step-label">結算派彩</div>
-        <div class="flow-step-desc">7 匹馬衝線後顯示前三名成績，中獎格閃爍提示，派彩即時入帳</div>
-      </div>
+
     </div>
   </div>
 

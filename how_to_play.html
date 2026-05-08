@@ -404,14 +404,14 @@
       <div class="flow-step">
         <div class="flow-step-num">2</div>
         <span class="flow-step-icon">3️⃣</span>
-        <div class="flow-step-label">按下開始</div>
-        <div class="flow-step-desc">按「開始比賽」後系統判定是否觸發特殊馬事件</div>
+        <div class="flow-step-label">按下開賽</div>
+        <div class="flow-step-desc">按「開賽」後進入倒數，比賽立即展開</div>
       </div>
       <div class="flow-step special-step">
         <div class="flow-step-num">★</div>
         <span class="flow-step-icon">✨</span>
-        <div class="flow-step-label">特殊馬揭曉</div>
-        <div class="flow-step-desc">若觸發黃金馬 / 黑金馬 / 雙馬，揭曉動畫顯示特殊賠率，點擊繼續</div>
+        <div class="flow-step-label">特殊馬現身</div>
+        <div class="flow-step-desc">若觸發黃金馬 / 黑金馬，中途顯示現身 Banner，賠率自動升級</div>
       </div>
       <div class="flow-step">
         <div class="flow-step-num">3</div>
@@ -437,8 +437,8 @@
         <div class="bet-card-name">獨贏</div>
         <div class="bet-card-rule">選 <strong>1 匹馬</strong>，猜牠跑<strong>第 1 名</strong>。<br>賠率最高，最刺激的玩法。</div>
         <div class="bet-card-example">
-          例：押 1,000 在賠率 5.2 的閃電王
-          <em>✓ 閃電王奪冠 → 派彩 5,200</em>
+          例：押 1,000 在賠率 5.2 的金槍六十
+          <em>✓ 金槍六十奪冠 → 派彩 5,200</em>
         </div>
       </div>
       <div class="bet-card place">
@@ -446,8 +446,8 @@
         <div class="bet-card-name">位置</div>
         <div class="bet-card-rule">選 <strong>1 匹馬</strong>，猜牠跑進<strong>前 3 名</strong>。<br>賠率較低，但中注機率大得多。</div>
         <div class="bet-card-example">
-          例：押 1,000 在賠率 1.9 的黑旋風
-          <em>✓ 黑旋風進前3 → 派彩 1,900</em>
+          例：押 1,000 在賠率 1.9 的翠河
+          <em>✓ 翠河進前3 → 派彩 1,900</em>
         </div>
       </div>
       <div class="bet-card quinella">
@@ -455,7 +455,7 @@
         <div class="bet-card-name">連贏</div>
         <div class="bet-card-rule">選 <strong>2 匹馬</strong>，猜包辦<strong>第 1、2 名</strong>（順序不限）。<br>難度最高，賠率最豐厚。</div>
         <div class="bet-card-example">
-          例：押 1,000 選閃電王＋赤兔馬
+          例：押 1,000 選金槍六十＋雄心威龍
           <em>✓ 兩匹包辦前2名（不分先後）即中</em>
         </div>
       </div>
@@ -494,9 +494,9 @@
   <div class="page" id="page-3">
     <div class="section-title">特殊馬事件</div>
     <div class="special-intro">
-      按下「開始比賽」後系統可能觸發特殊馬事件。<br>
-      <strong>特殊馬保證獲得指定名次</strong>，並將已下注的賠率自動升級為特殊倍率。<br>
-      共三種事件，稀有度依序：黃金馬 → 黑金馬 → 雙馬降臨。
+      按下「開賽」後，比賽中途可能出現特殊馬 Banner。<br>
+      <strong>特殊馬名次隨緣</strong>，但已下注的獨贏 / 位置賠率自動大幅升級。連贏賠率不受影響。<br>
+      共兩種事件，稀有度依序：黃金馬 → 黑金馬。
     </div>
     <div class="special-cards">
 
@@ -508,10 +508,10 @@
             <div class="sc-name">黃金馬</div>
           </div>
         </div>
-        <div class="sc-desc">金色光暈顯示，<strong style="color:#fff;">保證第一名</strong>。<br>獨贏與位置賠率自動升級。</div>
+        <div class="sc-desc">金色光暈顯示，<strong style="color:#fff;">名次隨緣</strong>。<br>獨贏與位置賠率自動升級。</div>
         <div class="sc-odds-table">
-          <div class="sc-odds-row"><span class="sc-odds-label">獨贏</span><span class="sc-odds-val">250x</span></div>
-          <div class="sc-odds-row"><span class="sc-odds-label">位置</span><span class="sc-odds-val">100x</span></div>
+          <div class="sc-odds-row"><span class="sc-odds-label">獨贏</span><span class="sc-odds-val">基礎賠率 × 1.5</span></div>
+          <div class="sc-odds-row"><span class="sc-odds-label">位置</span><span class="sc-odds-val">基礎賠率 × 1.2</span></div>
           <div class="sc-odds-row"><span class="sc-odds-label">連贏</span><span class="sc-odds-val" style="color:var(--text-sub);font-size:12px;">一般賠率</span></div>
         </div>
         <div class="sc-chance">觸發率約 6%</div>
@@ -525,33 +525,15 @@
             <div class="sc-name">黑金馬</div>
           </div>
         </div>
-        <div class="sc-desc">紫藍光暈顯示，<strong style="color:#fff;">保證第一名</strong>。<br>比黃金馬稀有，賠率更高。</div>
+        <div class="sc-desc">紫藍光暈顯示，<strong style="color:#fff;">名次隨緣</strong>。<br>比黃金馬稀有，賠率升幅更高。</div>
         <div class="sc-odds-table">
-          <div class="sc-odds-row"><span class="sc-odds-label">獨贏</span><span class="sc-odds-val">350x</span></div>
-          <div class="sc-odds-row"><span class="sc-odds-label">位置</span><span class="sc-odds-val">150x</span></div>
+          <div class="sc-odds-row"><span class="sc-odds-label">獨贏</span><span class="sc-odds-val">基礎賠率 × 3</span></div>
+          <div class="sc-odds-row"><span class="sc-odds-label">位置</span><span class="sc-odds-val">基礎賠率 × 2</span></div>
           <div class="sc-odds-row"><span class="sc-odds-label">連贏</span><span class="sc-odds-val" style="color:var(--text-sub);font-size:12px;">一般賠率</span></div>
         </div>
         <div class="sc-chance">觸發率約 1.5%</div>
       </div>
 
-      <div class="special-card double">
-        <div class="sc-header">
-          <div class="sc-icon">🌟</div>
-          <div>
-            <div class="sc-type">DOUBLE EVENT</div>
-            <div class="sc-name">雙馬降臨</div>
-          </div>
-        </div>
-        <div class="sc-desc">黃金馬＋黑金馬同時出現，<strong style="color:#fff;">包辦第1、2名</strong>。<br>連贏賠率大幅提升，最稀有。</div>
-        <div class="sc-odds-table">
-          <div class="sc-odds-row"><span class="sc-odds-label">黃金馬 獨贏</span><span class="sc-odds-val">80x</span></div>
-          <div class="sc-odds-row"><span class="sc-odds-label">黃金馬 位置</span><span class="sc-odds-val">20x</span></div>
-          <div class="sc-odds-row"><span class="sc-odds-label">黑金馬 獨贏</span><span class="sc-odds-val">120x</span></div>
-          <div class="sc-odds-row"><span class="sc-odds-label">黑金馬 位置</span><span class="sc-odds-val">30x</span></div>
-          <div class="sc-odds-row"><span class="sc-odds-label">連贏（雙馬合買）</span><span class="sc-odds-val hl">500x</span></div>
-        </div>
-        <div class="sc-chance">觸發率約 0.5%</div>
-      </div>
 
     </div>
   </div>
@@ -584,15 +566,15 @@
       <div class="how-row">
         <div class="how-num">④</div>
         <div class="how-body">
-          <div class="how-title">按下「開始比賽」</div>
-          <div class="how-desc">下注完成後隨時可按，特殊馬揭曉後自動進入倒數起跑</div>
+          <div class="how-title">按下「開賽」</div>
+          <div class="how-desc">下注完成後隨時可按，系統自動判定特殊馬並進入倒數起跑</div>
         </div>
       </div>
       <div class="how-row">
         <div class="how-num">⑤</div>
         <div class="how-body">
           <div class="how-title">結算後重複下注</div>
-          <div class="how-desc">點擊「重複上局」可沿用上場完整注單，直接進入下一局</div>
+          <div class="how-desc">點擊「重複下注」可沿用上場完整注單，直接進入下一局</div>
         </div>
       </div>
     </div>
@@ -626,7 +608,7 @@
     const to   = document.getElementById('page-' + n);
 
     from.classList.remove('active');
-    from.classList.add(dir > 0 ? 'exit-left' : '');
+    if (dir > 0) from.classList.add('exit-left');
     from.style.transform = dir > 0 ? 'translateX(-40px)' : 'translateX(40px)';
     from.style.opacity = '0';
     from.style.pointerEvents = 'none';

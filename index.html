@@ -611,9 +611,18 @@
       align-items:center; gap:6%;
       min-width:0; overflow:hidden; animation:cd-appear .25s ease-out;
       cursor:pointer; transition:border-color .15s, background .15s;
+      position:relative;
     }
     .insight-card:hover { background:rgba(255,255,255,.05); border-color:var(--accent-gold); }
     .insight-card.ic-active { border-color:var(--accent-gold); background:rgba(201,162,39,.10); }
+    .ic-hint {
+      position:absolute; top:4px; right:5px;
+      width:clamp(10px,1.3vw,15px); height:clamp(10px,1.3vw,15px);
+      opacity:.35; transition:opacity .15s;
+      pointer-events:none;
+    }
+    .insight-card:hover .ic-hint,
+    .insight-card.ic-active .ic-hint { opacity:.75; }
     #ic-tooltip {
       position:fixed; z-index:9000;
       background:rgba(12,20,38,.97);
@@ -1680,8 +1689,19 @@ function initMachine() {
   const saved = loadMachineData();
   if (saved && saved.id && Array.isArray(saved.history) && saved.history.length > 0) {
     machineId = saved.id;
-    S.history = saved.history;
-    S.raceNum = saved.raceNum || S.history.length + 1;
+    // 驗證 history 馬名是否符合當前 POOL，舊版資料一律重新生成
+    const validNames = new Set(POOL.map(h => h.name));
+    const isStale = saved.history.some(entry =>
+      entry.order && entry.order.some(h => !validNames.has(h.name))
+    );
+    if (isStale) {
+      S.history = generateBootstrapHistory(machineId);
+      S.raceNum = saved.raceNum || S.history.length + 1;
+      saveMachineData();
+    } else {
+      S.history = saved.history;
+      S.raceNum = saved.raceNum || S.history.length + 1;
+    }
   } else {
     machineId = 'M' + Date.now().toString(36).toUpperCase() +
                 Math.random().toString(36).slice(2,6).toUpperCase();
@@ -2474,6 +2494,12 @@ function renderInsights() {
       </div>`;
     }
     return `<div class="insight-card" data-desc="${ins.desc}">
+      <svg class="ic-hint" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+        <circle cx="8.5" cy="12" r="1.5" fill="var(--bg-card)"/>
+        <circle cx="12" cy="12" r="1.5" fill="var(--bg-card)"/>
+        <circle cx="15.5" cy="12" r="1.5" fill="var(--bg-card)"/>
+      </svg>
       <div class="ic-left">
         <div class="ic-icon">${ins.icon}</div>
         ${portraitHTML}

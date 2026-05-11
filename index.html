@@ -1587,9 +1587,11 @@ const CFG = {
   GOLDEN_HORSE_CHANCE:   0.06,   // 黃金馬觸發率 6%
   BLACK_HORSE_CHANCE:    0.015,  // 黑金馬觸發率 1.5%
   GOLDEN_WIN_MULT:       1.5,    // 黃金馬獨贏倍率（固定）
-  GOLDEN_PLACE_MULT:     1.2,    // 黃金馬位置倍率（固定）
+  GOLDEN_PLACE_MULT:     1.3,    // 黃金馬位置倍率（固定）
+  GOLDEN_QUINELLA_MULT:  1.1,    // 黃金馬連贏倍率（固定）
   BLACK_WIN_MULT:        3,      // 黑金馬獨贏倍率（固定）
   BLACK_PLACE_MULT:      2,      // 黑金馬位置倍率（固定）
+  BLACK_QUINELLA_MULT:   1.5,    // 黑金馬連贏倍率（固定）
 };
 
 // ════════════════════════════════════
@@ -1972,20 +1974,23 @@ function checkAndApplySpecialHorse() {
   // 任意一匹馬都可成為特殊馬
   const target = S.horses[Math.floor(Math.random() * S.horses.length)];
 
-  // 固定倍率：WIN / PLACE 分開，QUINELLA 不受影響
-  const winMult   = type === 'GOLDEN' ? CFG.GOLDEN_WIN_MULT   : CFG.BLACK_WIN_MULT;
-  const placeMult = type === 'GOLDEN' ? CFG.GOLDEN_PLACE_MULT : CFG.BLACK_PLACE_MULT;
-  target.specialOdds      = +(target.winOdds   * winMult).toFixed(1);
-  target.specialPlaceOdds = +(target.placeOdds * placeMult).toFixed(1);
-  target.specialType      = type;
-  target.specialMult      = winMult;    // 主顯示用（獨贏倍率）
-  target.specialWinMult   = winMult;
-  target.specialPlaceMult = placeMult;
+  // 固定倍率：WIN / PLACE / QUINELLA 分開
+  const winMult      = type === 'GOLDEN' ? CFG.GOLDEN_WIN_MULT      : CFG.BLACK_WIN_MULT;
+  const placeMult    = type === 'GOLDEN' ? CFG.GOLDEN_PLACE_MULT    : CFG.BLACK_PLACE_MULT;
+  const quinellaMult = type === 'GOLDEN' ? CFG.GOLDEN_QUINELLA_MULT : CFG.BLACK_QUINELLA_MULT;
+  target.specialOdds         = +(target.winOdds   * winMult).toFixed(1);
+  target.specialPlaceOdds    = +(target.placeOdds * placeMult).toFixed(1);
+  target.specialType         = type;
+  target.specialMult         = winMult;    // 主顯示用（獨贏倍率）
+  target.specialWinMult      = winMult;
+  target.specialPlaceMult    = placeMult;
+  target.specialQuinellaMult = quinellaMult;
 
   // 升級已下注的對應格
   S.bets.forEach(bet => {
     if (bet.type === 'WIN'   && bet.horses[0] === target.pos) { bet.odds = target.specialOdds;      bet.isSpecial = true; }
     if (bet.type === 'PLACE' && bet.horses[0] === target.pos) { bet.odds = target.specialPlaceOdds; bet.isSpecial = true; }
+    if (bet.type === 'QUINELLA' && bet.horses.includes(target.pos)) { bet.odds = +(bet.odds * quinellaMult).toFixed(1); bet.isSpecial = true; }
   });
 
   S.specialHorse = target;
@@ -2006,9 +2011,9 @@ function showSpecialReveal(callback) {
     <div class="sr-icon">${isBlack ? '🖤' : '✨'}</div>
     <div class="sr-label">${isBlack ? '【黑金馬】降臨！' : '【黃金馬】出現！'}</div>
     <div class="sr-horse">${S.specialHorse.pos}號 ${S.specialHorse.name}</div>
-    <div class="sr-odds" style="color:${multColor}">獨贏 ${S.specialHorse.specialWinMult}x ／ 位置 ${S.specialHorse.specialPlaceMult}x 加成</div>
+    <div class="sr-odds" style="color:${multColor}">獨贏 ${S.specialHorse.specialWinMult}x ／ 位置 ${S.specialHorse.specialPlaceMult}x ／ 連贏 ${S.specialHorse.specialQuinellaMult}x 加成</div>
     <div class="sr-sub">獨贏 <b style="color:${multColor}">${S.specialHorse.specialOdds}x</b>　位置 <b style="color:${multColor}">${S.specialHorse.specialPlaceOdds}x</b></div>
-    <div class="sr-sub" style="opacity:.6;font-size:.85em;">名次隨緣・連贏不影響</div>
+    <div class="sr-sub" style="opacity:.6;font-size:.85em;">名次隨緣・含此馬的連贏注單同步升級</div>
     <div class="sr-hint">點擊任意處繼續</div>`;
 
   overlay.classList.add('active');
@@ -3652,7 +3657,7 @@ function onRaceEnd(order) {
     const merged = {};
     results.forEach(({bet, win}) => {
       const key = bet.type + '|' + [...bet.horses].sort().join('-');
-      if (!merged[key]) merged[key] = { type:bet.type, horses:bet.horses, odds:bet.odds, amount:0, win:0 };
+      if (!merged[key]) merged[key] = { type:bet.type, horses:bet.horses, odds:bet.odds, amount:0, win:0, isSpecial:!!bet.isSpecial };
       merged[key].amount += bet.amount;
       merged[key].win    += win;
     });
@@ -3675,7 +3680,7 @@ function onRaceEnd(order) {
         <span><span class="rbd-type-badge rbd-type-${row.type}">${TYPE_LABEL[row.type]}</span></span>
         <span class="rbd-target">${targetHTML}</span>
         <span>$${row.amount.toLocaleString()}</span>
-        <span>${row.odds}x</span>
+        <span>${row.odds}x${row.isSpecial ? '<span style="color:#ffd700;font-size:.8em;margin-left:.2em;">★</span>' : ''}</span>
         <span class="${isWon?'rbd-result-won':'rbd-result-lost'}">${isWon?'✓ 中注':'✗ 未中'}</span>
         <span class="${isWon?'rbd-payout-won':'rbd-payout-lost'}">${isWon?'+$'+Math.round(row.win).toLocaleString():'—'}</span>
       </div>`;
@@ -3801,33 +3806,44 @@ function drawSmallMoveFloaters(ctx) {
 function refreshSpecialOdds() {
   if (!S.specialHorse) return;
   const h = S.specialHorse;
+
+  function runTicker(oddsEl, baseVal, finalOdds) {
+    let tick = 0;
+    const TICKS = 14;
+    function doTick() {
+      tick++;
+      if (tick >= TICKS) {
+        oddsEl.textContent = finalOdds + 'x';
+        oddsEl.classList.add('odds-refreshed');
+      } else {
+        const rand = +(baseVal + Math.random() * (finalOdds - baseVal)).toFixed(1);
+        oddsEl.textContent = rand + 'x';
+        setTimeout(doTick, 75);
+      }
+    }
+    doTick();
+  }
+
+  // WIN / PLACE — 固定 finalOdds
   [
     { type: 'WIN',   finalOdds: h.specialOdds },
     { type: 'PLACE', finalOdds: h.specialPlaceOdds },
   ].forEach(({ type, finalOdds }) => {
     const cell = document.querySelector(`[data-type="${type}"][data-pos="${h.pos}"]`);
     if (!cell) return;
-
-    // ── 第二段：賠率 ticker ──
     const oddsEl = cell.querySelector('.bci-odds') || cell.querySelector('.hr-odds');
-    if (oddsEl) {
-      const baseVal = parseFloat(oddsEl.textContent) || finalOdds;
-      let tick = 0;
-      const TICKS = 14;
-      function doTick() {
-        tick++;
-        if (tick >= TICKS) {
-          oddsEl.textContent = finalOdds + 'x';
-          oddsEl.classList.add('odds-refreshed');
-        } else {
-          const rand = +(baseVal + Math.random() * (finalOdds - baseVal)).toFixed(1);
-          oddsEl.textContent = rand + 'x';
-          setTimeout(doTick, 75);
-        }
-      }
-      doTick();
-    }
+    if (oddsEl) runTicker(oddsEl, parseFloat(oddsEl.textContent) || finalOdds, finalOdds);
   });
+
+  // QUINELLA — 每格 base 不同，乘以 quinellaMult
+  document.querySelectorAll(`[data-type="QUINELLA"][data-pos-a="${h.pos}"], [data-type="QUINELLA"][data-pos-b="${h.pos}"]`)
+    .forEach(cell => {
+      const oddsEl = cell.querySelector('.bci-odds') || cell.querySelector('.tl-q-odds');
+      if (!oddsEl) return;
+      const baseVal  = parseFloat(oddsEl.textContent) || 1;
+      const finalOdds = +(baseVal * h.specialQuinellaMult).toFixed(1);
+      runTicker(oddsEl, baseVal, finalOdds);
+    });
 }
 
 function triggerSpecialMidReveal() {
@@ -3968,6 +3984,8 @@ function flashSpecialCells() {
     const placeCell = document.querySelector(`[data-type="PLACE"][data-pos="${horse.pos}"]`);
     if (winCell)   targets.push({ cell: winCell,   cls });
     if (placeCell) targets.push({ cell: placeCell, cls });
+    document.querySelectorAll(`[data-type="QUINELLA"][data-pos-a="${horse.pos}"], [data-type="QUINELLA"][data-pos-b="${horse.pos}"]`)
+      .forEach(cell => targets.push({ cell, cls }));
   };
 
   addHorseCells(S.specialHorse);

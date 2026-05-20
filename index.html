@@ -1661,7 +1661,7 @@ function generateBootstrapHistory(id) {
       const noise = 0.98 + rng() * 0.04;
       return { id:h.id, name:h.name, color:h.color, silk:h.silk,
                pos:idx+1, trueProb:tp,
-               winOdds: +(1/tp * CFG.RTP_WIN * noise).toFixed(1) };
+               winOdds: +((1/tp * CFG.RTP_WIN * noise) - 1).toFixed(1) };
     });
 
     const order = seededSimRace(horses, rng);
@@ -1687,6 +1687,10 @@ function loadMachineData() {
 let machineId  = '';
 let machineNum = 0;
 
+function generateLineup() {
+  return [...POOL].sort(() => Math.random() - .5).slice(0, 7).map((h, i) => ({ ...h, pos: i + 1 }));
+}
+
 function initMachine() {
   const saved = loadMachineData();
   if (saved && saved.id && Array.isArray(saved.history) && saved.history.length > 0) {
@@ -1699,16 +1703,18 @@ function initMachine() {
     if (isStale) {
       S.history = generateBootstrapHistory(machineId);
       S.raceNum = saved.raceNum || S.history.length + 1;
-      saveMachineData();
     } else {
       S.history = saved.history;
       S.raceNum = saved.raceNum || S.history.length + 1;
     }
+    S.horseLineup = generateLineup();
+    saveMachineData();
   } else {
     machineId = 'M' + Date.now().toString(36).toUpperCase() +
                 Math.random().toString(36).slice(2,6).toUpperCase();
     S.history = generateBootstrapHistory(machineId);
     S.raceNum = S.history.length + 1;
+    S.horseLineup = generateLineup();
     saveMachineData();
   }
   machineNum = (strToSeed(machineId) % 1000) + 1;
@@ -1729,6 +1735,7 @@ const S = {
 
   lastBets:    [],          // 上場注單（重複下注用，存 {type, horseIds, amount, odds}）
   history:     [],          // max 50 entries: {raceNum, order, goldenPos, winnerWinOdds}
+  horseLineup: null,        // 進機台時固定的 7 匹馬（含 pos），整個 session 不變
   raceScript:   null,        // 1–5，本場選中的劇本
   specialHorse:    null,   // 特殊馬（黃金馬 or 黑金馬），名次隨機
   specialType:     null,   // 'GOLDEN' | 'BLACK' | null
@@ -1928,19 +1935,20 @@ function calcQuinellaProb(ha, hb) {
 // CORE LOGIC
 // ════════════════════════════════════
 function pickHorses() {
-  const shuffled = [...POOL].sort(() => Math.random()-.5).slice(0,7);
-  const weights  = [...TRUE_PROB_WEIGHTS].sort(() => Math.random()-.5);
-  const wSum     = weights.reduce((a,b) => a+b, 0);
+  // 使用機台固定 lineup（馬匹與編號不變），每場只重新分配勝率與賠率
+  const base    = S.horseLineup ? S.horseLineup.map(h => ({ ...h }))
+                                : generateLineup();
+  const weights = [...TRUE_PROB_WEIGHTS].sort(() => Math.random() - .5);
+  const wSum    = weights.reduce((a, b) => a + b, 0);
 
   // 第一輪：賦予真實勝率 + 獨贏賠率（顯示值加 ±4% 雜訊製造盤口變化感）
-  const horses = shuffled.map((h, i) => {
+  const horses = base.map((h, i) => {
     const tp    = weights[i] / wSum;
     const noise = 0.98 + Math.random() * 0.04;
     return {
       ...h,
-      pos:       i + 1,
       trueProb:  tp,
-      winOdds:   +(1/tp * CFG.RTP_WIN * noise).toFixed(1),
+      winOdds:   +((1/tp * CFG.RTP_WIN * noise) - 1).toFixed(1),
       placeOdds: 0,
       finalPos:  null,
     };
@@ -1950,7 +1958,7 @@ function pickHorses() {
   horses.forEach(h => {
     const pp    = calcPlaceProb(horses, h);
     const noise = 0.98 + Math.random() * 0.04;
-    h.placeOdds = +(1/pp * CFG.RTP_PLACE * noise).toFixed(1);
+    h.placeOdds = +((1/pp * CFG.RTP_PLACE * noise) - 1).toFixed(1);
   });
 
   return horses;
@@ -2033,7 +2041,7 @@ function showSpecialReveal(callback) {
 
 function calcQuinellaOdds(ha, hb) {
   const prob = calcQuinellaProb(ha, hb);
-  return +(1/prob * CFG.RTP_QUINELLA).toFixed(1);
+  return +((1/prob * CFG.RTP_QUINELLA) - 1).toFixed(1);
 }
 
 function simulateRace(horses) {
@@ -2067,13 +2075,13 @@ function calcPayout(bets, horses) {
     let win = 0;
     if (bet.type==='WIN') {
       // bet.horses[0] 是位置號碼 (pos)
-      if (bet.horses[0]===first.pos) win = bet.amount*bet.odds;
+      if (bet.horses[0]===first.pos) win = bet.amount*bet.odds + bet.amount;
     } else if (bet.type==='PLACE') {
       const top3pos = [first.pos, second.pos, third.pos];
-      if (top3pos.includes(bet.horses[0])) win = bet.amount*bet.odds;
+      if (top3pos.includes(bet.horses[0])) win = bet.amount*bet.odds + bet.amount;
     } else if (bet.type==='QUINELLA') {
       const top2pos = [first.pos, second.pos];
-      if (bet.horses.every(p=>top2pos.includes(p))) win = bet.amount*bet.odds;
+      if (bet.horses.every(p=>top2pos.includes(p))) win = bet.amount*bet.odds + bet.amount;
     }
     totalWin += win;
     results.push({bet, win});
